@@ -4,11 +4,17 @@ import test from 'node:test';
 import { fingerprintAction, normalizeSpellAction } from '../../../module/spells/domain.mjs';
 import { SpellApplicationService } from '../../../module/spells/application.mjs';
 
-function fixture({ isGM = true, failMessageUpdate = false, failRollback = false } = {}) {
+function fixture({
+  isGM = true,
+  failMessageUpdate = false,
+  failRollback = false,
+  playerOwnsSpell = true,
+  kind = 'damage'
+} = {}) {
   const action = normalizeSpellAction({
-    id: 'damage-action',
-    kind: 'damage',
-    label: 'Damage',
+    id: `${kind}-action`,
+    kind,
+    label: kind === 'damage' ? 'Damage' : 'Healing',
     formula: '1d6',
     target: { mode: 'single' }
   });
@@ -46,6 +52,7 @@ function fixture({ isGM = true, failMessageUpdate = false, failRollback = false 
   };
   const message = {
     uuid: 'ChatMessage.result-1',
+    author: { id: 'player-user' },
     flags: { 'swords-wizardry': { spell: flags } },
     updates: [],
     getFlag(scope, key) { return this.flags[scope][key]; },
@@ -56,14 +63,111 @@ function fixture({ isGM = true, failMessageUpdate = false, failRollback = false 
       return this;
     }
   };
-  const documents = new Map([[message.uuid, message], [token.uuid, token]]);
+  const sourceMessage = {
+    uuid: flags.sourceMessageUuid,
+    flags: {
+      'swords-wizardry': {
+        spell: {
+          schemaVersion: 1,
+          messageKind: 'spell-card',
+          sourceItemUuid: flags.sourceItemUuid,
+          actions: [{ ...action, fingerprint: fingerprintAction(action) }]
+        }
+      }
+    },
+    getFlag(scope, key) { return this.flags[scope][key]; }
+  };
+  const sourceItem = {
+    uuid: flags.sourceItemUuid,
+    type: 'spell',
+    testUserPermission(user, permission) {
+      return permission === 'OWNER' && (user.isGM || playerOwnsSpell);
+    }
+  };
+  const users = new Map([
+    ['gm-user', { id: 'gm-user', isGM: true }],
+    ['player-user', { id: 'player-user', isGM: false }],
+    ['other-player', { id: 'other-player', isGM: false }]
+  ]);
+  const documents = new Map([
+    [message.uuid, message],
+    [sourceMessage.uuid, sourceMessage],
+    [sourceItem.uuid, sourceItem],
+    [token.uuid, token]
+  ]);
   const deps = {
     resolveUuid: async (uuid) => documents.get(uuid) ?? null,
     getCurrentUser: () => ({ id: 'gm-user', isGM }),
+    getUserById: (id) => users.get(id) ?? null,
     now: () => 123456789
   };
-  return { action, actor, token, message, documents, deps };
+  return {
+    action,
+    actor,
+    token,
+    message,
+    sourceMessage,
+    sourceItem,
+    users,
+    documents,
+    deps
+  };
 }
+
+test('active GM automatically applies full damage from an owned spell result', async () => {
+  const state = fixture();
+  const result = await new SpellApplicationService(state.deps).applyAutomatically(
+    state.message.uuid,
+    {
+      requestingUserId: 'player-user',
+      targetUuid: state.token.uuid
+    }
+  );
+
+  assert.equal(result.status, 'success');
+  assert.equal(result.application.multiplier, 1);
+  assert.equal(state.actor.system.hp.value, 5);
+});
+
+test('active GM automatically applies full healing from an owned spell result', async () => {
+  const state = fixture({ kind: 'healing' });
+  const result = await new SpellApplicationService(state.deps).applyAutomatically(
+    state.message.uuid,
+    {
+      requestingUserId: 'player-user',
+      targetUuid: state.token.uuid
+    }
+  );
+
+  assert.equal(result.status, 'success');
+  assert.equal(result.application.multiplier, 1);
+  assert.equal(result.application.appliedAmount, 2);
+  assert.equal(state.actor.system.hp.value, 12);
+});
+
+test('automatic damage rejects forged authors and unowned source spells', async () => {
+  const forged = fixture();
+  const forgedResult = await new SpellApplicationService(forged.deps).applyAutomatically(
+    forged.message.uuid,
+    {
+      requestingUserId: 'other-player',
+      targetUuid: forged.token.uuid
+    }
+  );
+  assert.equal(forgedResult.code, 'AUTO_APPLICATION_NOT_AUTHORIZED');
+  assert.equal(forged.actor.updates.length, 0);
+
+  const unowned = fixture({ playerOwnsSpell: false });
+  const unownedResult = await new SpellApplicationService(unowned.deps).applyAutomatically(
+    unowned.message.uuid,
+    {
+      requestingUserId: 'player-user',
+      targetUuid: unowned.token.uuid
+    }
+  );
+  assert.equal(unownedResult.code, 'AUTO_APPLICATION_NOT_AUTHORIZED');
+  assert.equal(unowned.actor.updates.length, 0);
+});
 
 test('GM applies bounded damage once to a synthetic token Actor', async () => {
   const state = fixture();

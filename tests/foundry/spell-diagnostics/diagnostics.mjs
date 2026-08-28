@@ -33,8 +33,14 @@ async function runSpellDiagnostics({ retainFixtures = false, ownerUserId = null 
     ? { [owner.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER }
     : {};
   const fixtures = { ownerUserId: owner?.id ?? null };
+  const originalDmAppliesDamage = game.settings.get(SYSTEM_ID, 'dmAppliesDamage');
+  let changedDamageSetting = false;
 
   try {
+    if (!originalDmAppliesDamage) {
+      await game.settings.set(SYSTEM_ID, 'dmAppliesDamage', true);
+      changedDamageSetting = true;
+    }
     const caster = track(trackedDocuments, await Actor.implementation.create({
       name: `${FIXTURE_PREFIX} Caster`,
       type: 'character',
@@ -237,6 +243,17 @@ async function runSpellDiagnostics({ retainFixtures = false, ownerUserId = null 
       cleanup.deleted += sweep.deleted;
       cleanup.failures.push(...sweep.failures);
       cleanup.status = cleanup.failures.length ? 'failed' : 'success';
+    }
+    if (changedDamageSetting) {
+      try {
+        await game.settings.set(SYSTEM_ID, 'dmAppliesDamage', originalDmAppliesDamage);
+      } catch (error) {
+        cleanup.failures.push({
+          setting: `${SYSTEM_ID}.dmAppliesDamage`,
+          message: error instanceof Error ? error.message : String(error)
+        });
+        cleanup.status = 'failed';
+      }
     }
     lastReport = {
       schemaVersion: 1,

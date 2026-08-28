@@ -22,6 +22,10 @@
   shadows, and use regular-weight metadata labels for light and dark UIs.
 - Scope applied damage and healing state to its originating result message so
   a new casting always receives fresh application controls.
+- Rename the setting to **DM must apply damage / healing** and honor it for both
+  kinds of Spell Effect: when unchecked, the full result is applied immediately
+  to each snapshotted target by the active GM; when checked, the existing manual
+  application controls remain.
 - Add unit/integration tests, static contract checks, a release allowlist,
   reproducible packaging, a self-cleaning Foundry diagnostic module, and a
   safety-gated Playwright GM/player suite.

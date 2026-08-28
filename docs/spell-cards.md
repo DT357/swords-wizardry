@@ -72,6 +72,13 @@ result, target membership, target UUID, caller authority, amount, and multiplier
 immediately before updating HP. Each effect/target pair has a deterministic ID,
 so retries do not duplicate the change.
 
+The **DM must apply damage / healing** world setting governs both damage and
+healing Spell Effects. When checked, a GM chooses Damage, Half, or Double for
+damage, or the corresponding healing amount, on the result card. When unchecked,
+the active GM immediately applies the full rolled result to every captured target
+and the manual application buttons are omitted. Automatic application requires an
+active GM client.
+
 ## Deliberately manual procedures
 
 The following remain table procedures in 4.2.0:

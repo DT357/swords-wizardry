@@ -45,6 +45,10 @@ await game.modules.get('swords-wizardry-spell-diagnostics').api.cleanup()
 - Apply half, full, and double damage and healing. Confirm HP is bounded, applied
   amounts are shown, duplicate clicks do not apply twice, and unlinked Tokens
   update their synthetic Actors.
+- Check **DM must apply damage / healing**, confirm damage and healing results
+  retain their manual application buttons, then uncheck it and confirm new damage
+  and healing results immediately apply their full totals to every captured target
+  without buttons.
 - Exercise public, GM, blind, and self roll modes.
 - Review cards and the editor at normal and constrained viewport sizes, with a
   long Spell name and long localized labels. Check keyboard activation, visible

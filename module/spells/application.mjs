@@ -24,7 +24,81 @@ export class SpellApplicationService {
     if (typeof dependencies?.getCurrentUser !== 'function') {
       throw new TypeError('SpellApplicationService requires getCurrentUser.');
     }
+    if (typeof dependencies?.getUserById !== 'function') {
+      throw new TypeError('SpellApplicationService requires getUserById.');
+    }
     this.#deps = dependencies;
+  }
+
+  async applyAutomatically(messageOrUuid, options = {}) {
+    const currentUser = this.#deps.getCurrentUser();
+    if (!currentUser?.isGM) return failure('GM_REQUIRED');
+
+    try {
+      const message = typeof messageOrUuid === 'string'
+        ? await this.#deps.resolveUuid(messageOrUuid)
+        : messageOrUuid;
+      if (!message) return failure('MESSAGE_NOT_FOUND');
+
+      const flags = message.getFlag?.(SYSTEM_ID, SPELL_FLAG_KEY)
+        ?? message.flags?.[SYSTEM_ID]?.[SPELL_FLAG_KEY];
+      if (
+        flags?.schemaVersion !== SPELL_MESSAGE_SCHEMA_VERSION
+        || flags?.messageKind !== 'spell-result'
+        || !['damage', 'healing'].includes(flags?.action?.kind)
+      ) {
+        return failure('ACTION_NOT_APPLICABLE');
+      }
+
+      const requestingUserId = String(options.requestingUserId ?? '');
+      const requestingUser = this.#deps.getUserById(requestingUserId);
+      const authorId = message.author?.id ?? message.user?.id ?? message.user;
+      if (!requestingUser || authorId !== requestingUserId) {
+        return failure('AUTO_APPLICATION_NOT_AUTHORIZED');
+      }
+
+      const sourceMessage = await this.#deps.resolveUuid(flags.sourceMessageUuid);
+      const sourceFlags = sourceMessage?.getFlag?.(SYSTEM_ID, SPELL_FLAG_KEY)
+        ?? sourceMessage?.flags?.[SYSTEM_ID]?.[SPELL_FLAG_KEY];
+      if (
+        sourceFlags?.schemaVersion !== SPELL_MESSAGE_SCHEMA_VERSION
+        || sourceFlags?.messageKind !== 'spell-card'
+        || sourceFlags.sourceItemUuid !== flags.sourceItemUuid
+      ) {
+        return failure('AUTO_APPLICATION_SOURCE_INVALID');
+      }
+
+      const sourceStoredAction = sourceFlags.actions?.find(
+        (entry) => entry.id === flags.action.id
+      );
+      if (!sourceStoredAction) return failure('AUTO_APPLICATION_SOURCE_INVALID');
+      const { fingerprint: sourceFingerprint, ...sourceActionData } = sourceStoredAction;
+      const sourceAction = normalizeSpellAction(sourceActionData);
+      if (
+        sourceFingerprint !== fingerprintAction(sourceAction)
+        || sourceFingerprint !== flags.action.fingerprint
+      ) {
+        return failure('STALE_ACTION');
+      }
+
+      const sourceItem = await this.#deps.resolveUuid(flags.sourceItemUuid);
+      const ownsSource = requestingUser.isGM
+        || sourceItem?.testUserPermission?.(requestingUser, 'OWNER') === true;
+      if (sourceItem?.type !== 'spell' || !ownsSource) {
+        return failure('AUTO_APPLICATION_NOT_AUTHORIZED');
+      }
+
+      return this.apply(message, {
+        targetUuid: options.targetUuid,
+        kind: flags.action.kind,
+        multiplier: 1
+      });
+    } catch (error) {
+      if (error instanceof SpellValidationError) {
+        return failure(error.code, { error, details: error.details });
+      }
+      return failure('APPLICATION_FAILED', { error });
+    }
   }
 
   async apply(messageOrUuid, options = {}) {
@@ -163,6 +237,7 @@ export function createFoundrySpellApplicationService() {
   return new SpellApplicationService({
     resolveUuid: (uuid) => resolveUuid(uuid),
     getCurrentUser: () => game.user,
+    getUserById: (id) => game.users.get(id),
     now: () => Date.now()
   });
 }

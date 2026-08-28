@@ -107,7 +107,8 @@
         "ConsumptionFailed": "La tarjeta se publicó, pero el conjuro memorizado no se consumió. Revisa el Actor antes de continuar."
       },
       "Notifications": {
-        "AuditFailed": "El conjuro se consumió, pero no se pudo actualizar la auditoría de la tarjeta."
+        "AuditFailed": "El conjuro se consumió, pero no se pudo actualizar la auditoría de la tarjeta.",
+        "AutoApplicationFailed": "No se pudo aplicar automáticamente el daño o la curación del conjuro a {count} objetivo(s)."
       },
       "Validation": {
         "UNKNOWN": "No se pudo completar el efecto del conjuro.",

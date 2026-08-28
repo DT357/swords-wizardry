@@ -113,7 +113,9 @@ Targets are captured when an effect starts. The result card therefore continues
 to refer to the same Actor or Token even if the user's selected targets change.
 For damage and healing effects, a GM can apply half, full, or double the rolled
 total. HP changes are clamped between zero and maximum HP, and a repeated click
-cannot apply the same effect to the same target twice.
+cannot apply the same effect to the same target twice. If **DM must apply damage
+/ healing** is unchecked in the system settings, damage and healing effects
+instead apply their full total immediately through the active GM.
 
 See [docs/spell-cards.md](docs/spell-cards.md) for examples and limitations.
 

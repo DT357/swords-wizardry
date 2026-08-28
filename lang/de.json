@@ -107,7 +107,8 @@
         "ConsumptionFailed": "Die Zauberkarte wurde angezeigt, aber der vorbereitete Zauber wurde nicht verbraucht. Bitte den Charakter prüfen."
       },
       "Notifications": {
-        "AuditFailed": "Der Zauber wurde verbraucht, aber die Zauberkarte konnte nicht aktualisiert werden."
+        "AuditFailed": "Der Zauber wurde verbraucht, aber die Zauberkarte konnte nicht aktualisiert werden.",
+        "AutoApplicationFailed": "Automatischer Zauberschaden oder automatische Heilung konnte bei {count} Ziel(en) nicht angewendet werden."
       },
       "Validation": {
         "UNKNOWN": "Der Zaubereffekt konnte nicht abgeschlossen werden.",

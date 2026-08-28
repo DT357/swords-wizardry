@@ -17,6 +17,10 @@ prepared-spell consumption, action evaluation, GM damage/healing application,
 synthetic Actor updates, audit flags, public/GM/blind/self message visibility,
 clamping, and idempotency. It then deletes only its own flagged fixtures.
 
+To keep the explicit manual damage and healing checks deterministic, the
+diagnostic temporarily enables **DM must apply damage / healing** and restores
+the original world setting in its cleanup path.
+
 To retain fixtures for inspection:
 
 ```js

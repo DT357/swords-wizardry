@@ -21,6 +21,15 @@ player-authored mutation envelopes. Hidden controls are not treated as an
 authorization boundary: the service checks the current user again before every
 application.
 
+When **DM must apply damage / healing** is disabled, the designated active GM
+observes the public `createChatMessage` Document hook and automatically applies
+damage and healing result messages. Foundry supplies the authenticated requesting
+user ID to this hook.
+Before writing HP, the service verifies that the result author matches that
+user, the source is a valid spell card with the same fingerprinted action, and
+the requester owns the source Spell Item. This reuses the normal idempotent GM
+application path without trusting the system's legacy custom socket payloads.
+
 Each application uses a deterministic message/action/target ID. The service
 revalidates the message schema, action fingerprint, operation, target membership,
 UUID, amount, and multiplier. It updates the target Actor and then writes an

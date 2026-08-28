@@ -173,7 +173,7 @@ test.describe('Swords & Wizardry spell cards in Foundry', () => {
     }
   });
 
-  test('owning player can invoke while HP application remains GM-only', async ({ browser }, testInfo) => {
+  test('manual and automatic player damage/healing remain GM-authoritative', async ({ browser }, testInfo) => {
     const runtime = runtimeConfiguration();
     const gmContext = await browser.newContext();
     const playerContext = await browser.newContext();
@@ -181,12 +181,16 @@ test.describe('Swords & Wizardry spell cards in Foundry', () => {
     const playerPage = await playerContext.newPage();
     const gmEvidence = collectEvidence(gmPage);
     const playerEvidence = collectEvidence(playerPage);
+    let originalDmAppliesDamage;
 
     try {
       await joinWorld(gmPage, runtime.gm);
       await joinWorld(playerPage, runtime.player);
       await assertDisposableRuntime(gmPage, runtime);
       await assertDisposableRuntime(playerPage, runtime);
+      originalDmAppliesDamage = await gmPage.evaluate(() => (
+        game.settings.get('swords-wizardry', 'dmAppliesDamage')
+      ));
 
       const report = await gmPage.evaluate(async ({ diagnosticId, ownerName }) => {
         const owner = game.users.getName(ownerName);
@@ -198,6 +202,14 @@ test.describe('Swords & Wizardry spell cards in Foundry', () => {
       }, { diagnosticId: DIAGNOSTIC_ID, ownerName: runtime.player.name });
       expect(report.failed, JSON.stringify(report.tests, null, 2)).toBe(0);
       await attachReport(testInfo, report);
+      await gmPage.evaluate(() => game.settings.set(
+        'swords-wizardry',
+        'dmAppliesDamage',
+        true
+      ));
+      await expect.poll(() => playerPage.evaluate(() => (
+        game.settings.get('swords-wizardry', 'dmAppliesDamage')
+      ))).toBe(true);
 
       await gmPage.evaluate(() => ui.chat?.scrollBottom?.());
       const gmResult = gmPage.locator(
@@ -309,16 +321,133 @@ test.describe('Swords & Wizardry spell cards in Foundry', () => {
         foreignId: foreignApplicationId
       })).toBe(true);
 
+      const hpBeforeAutomaticDamage = await gmPage.evaluate(async (targetUuid) => {
+        const target = await fromUuid(targetUuid);
+        return {
+          value: target.actor.system.hp.value,
+          maximum: target.actor.system.hp.max
+        };
+      }, report.fixtures.targetTokenUuid);
+      await gmPage.evaluate(() => game.settings.set(
+        'swords-wizardry',
+        'dmAppliesDamage',
+        false
+      ));
+      await expect.poll(() => playerPage.evaluate(() => (
+        game.settings.get('swords-wizardry', 'dmAppliesDamage')
+      ))).toBe(false);
+
+      const automaticResult = await playerPage.evaluate(async ({ cardId, targetUuid }) => {
+        const result = await game.swordswizardry.spells.invoke(
+          game.messages.get(cardId),
+          'diagnostic-damage',
+          { targetUuids: [targetUuid], rollMode: 'publicroll' }
+        );
+        return {
+          status: result.status,
+          code: result.code ?? null,
+          messageId: result.message?.id ?? null
+        };
+      }, {
+        cardId: report.fixtures.permissionCardMessageId,
+        targetUuid: report.fixtures.targetTokenUuid
+      });
+      expect(automaticResult).toMatchObject({ status: 'success' });
+      expect(automaticResult.messageId).toBeTruthy();
+      await expect.poll(() => gmPage.evaluate(async ({ messageId, targetUuid }) => {
+        const target = await fromUuid(targetUuid);
+        const entries = game.messages.get(messageId)
+          ?.getFlag('swords-wizardry', 'spell')?.application?.entries ?? {};
+        return {
+          hp: target.actor.system.hp.value,
+          applications: Object.keys(entries).length
+        };
+      }, {
+        messageId: automaticResult.messageId,
+        targetUuid: report.fixtures.targetTokenUuid
+      })).toEqual({
+        hp: Math.max(0, hpBeforeAutomaticDamage.value - 2),
+        applications: 1
+      });
+
+      await gmPage.evaluate(() => ui.chat?.scrollBottom?.());
+      const automaticCard = gmPage.locator(
+        `#sidebar #chat [data-message-id="${automaticResult.messageId}"] [data-spell-message-kind="spell-result"]`
+      );
+      await expect(automaticCard.locator('[data-action="spellApply"]')).toHaveCount(0);
+      await expect(automaticCard.locator('.spell-result__application-status')).not.toHaveText('');
+
+      const automaticHealingResult = await playerPage.evaluate(
+        async ({ healingSpellUuid, targetUuid }) => {
+          const healingSpell = await fromUuid(healingSpellUuid);
+          const card = await game.swordswizardry.spells.post(healingSpell, {
+            targetUuids: [targetUuid]
+          });
+          if (card.status !== 'success') return { status: card.status, code: card.code ?? null };
+          const result = await game.swordswizardry.spells.invoke(
+            card.message,
+            'diagnostic-healing',
+            { targetUuids: [targetUuid], rollMode: 'publicroll' }
+          );
+          return {
+            status: result.status,
+            code: result.code ?? null,
+            messageId: result.message?.id ?? null
+          };
+        },
+        {
+          healingSpellUuid: report.fixtures.healingSpellUuid,
+          targetUuid: report.fixtures.targetTokenUuid
+        }
+      );
+      expect(automaticHealingResult).toMatchObject({ status: 'success' });
+      expect(automaticHealingResult.messageId).toBeTruthy();
+      await expect.poll(() => gmPage.evaluate(async ({ messageId, targetUuid }) => {
+        const target = await fromUuid(targetUuid);
+        const entries = game.messages.get(messageId)
+          ?.getFlag('swords-wizardry', 'spell')?.application?.entries ?? {};
+        return {
+          hp: target.actor.system.hp.value,
+          applications: Object.keys(entries).length
+        };
+      }, {
+        messageId: automaticHealingResult.messageId,
+        targetUuid: report.fixtures.targetTokenUuid
+      })).toEqual({
+        hp: Math.min(
+          hpBeforeAutomaticDamage.maximum,
+          Math.max(0, hpBeforeAutomaticDamage.value - 2) + 3
+        ),
+        applications: 1
+      });
+
+      await gmPage.evaluate(() => ui.chat?.scrollBottom?.());
+      const automaticHealingCard = gmPage.locator(
+        `#sidebar #chat [data-message-id="${automaticHealingResult.messageId}"] [data-spell-message-kind="spell-result"]`
+      );
+      await expect(automaticHealingCard.locator('[data-action="spellApply"]')).toHaveCount(0);
+      await expect(automaticHealingCard.locator('.spell-result__application-status')).not.toHaveText('');
+
       await gmPage.screenshot({ path: testInfo.outputPath('gm-application.png'), fullPage: true });
       await playerPage.screenshot({ path: testInfo.outputPath('player-permissions.png'), fullPage: true });
       expect(criticalEvidence(gmEvidence)).toEqual([]);
       expect(criticalEvidence(playerEvidence)).toEqual([]);
     } finally {
-      await cleanupDiagnostics(gmPage);
-      await attachEvidence(testInfo, gmEvidence, 'gm-runtime-events.json');
-      await attachEvidence(testInfo, playerEvidence, 'player-runtime-events.json');
-      await gmContext.close();
-      await playerContext.close();
+      try {
+        if (typeof originalDmAppliesDamage === 'boolean' && !gmPage.isClosed()) {
+          await gmPage.evaluate((value) => game.settings.set(
+            'swords-wizardry',
+            'dmAppliesDamage',
+            value
+          ), originalDmAppliesDamage);
+        }
+      } finally {
+        await cleanupDiagnostics(gmPage);
+        await attachEvidence(testInfo, gmEvidence, 'gm-runtime-events.json');
+        await attachEvidence(testInfo, playerEvidence, 'player-runtime-events.json');
+        await gmContext.close();
+        await playerContext.close();
+      }
     }
   });
 });

@@ -107,7 +107,8 @@
         "ConsumptionFailed": "The spell card was posted, but the prepared spell was not consumed. Review the Actor before continuing."
       },
       "Notifications": {
-        "AuditFailed": "The prepared spell was consumed, but the chat-card audit could not be updated."
+        "AuditFailed": "The prepared spell was consumed, but the chat-card audit could not be updated.",
+        "AutoApplicationFailed": "Automatic spell damage or healing could not be applied to {count} target(s)."
       },
       "Validation": {
         "UNKNOWN": "The spell effect could not be completed.",

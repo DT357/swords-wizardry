@@ -31,7 +31,9 @@ Roll actions use an explicit, namespaced context: `@spell.level`,
 `@spell.casterLevel`, and `@spell.abilityModifier`. Selected targets are captured
 when an effect begins so later selection changes cannot redirect a result.
 Damage and healing results can be applied by a GM, are clamped to valid HP
-bounds, and record an idempotent audit entry on the result card.
+bounds, and record an idempotent audit entry on the result card. When **DM must
+apply damage / healing** is unchecked, both kinds of Spell Effect immediately
+apply their full roll to each captured target through the active GM.
 
 Saving throws, magic resistance, disbelief, durations, ongoing damage, summoned
 creatures, and Active Effects remain explicit table procedures in this release.

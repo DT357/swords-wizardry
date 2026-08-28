@@ -3,23 +3,75 @@ import { isApplicationEntryForMessage } from './application.mjs';
 
 export class SpellChatController {
   #deps;
-  #hookId = null;
+  #renderHookId = null;
+  #createHookId = null;
   #renderHandler;
+  #createHandler;
 
   constructor(dependencies) {
-    this.#deps = dependencies;
+    this.#deps = {
+      getActiveGM: () => null,
+      dmAppliesDamage: () => true,
+      ...dependencies
+    };
     this.#renderHandler = (message, html) => this.#onRender(message, html);
+    this.#createHandler = (message, _options, userId) => (
+      this.#onCreate(message, userId).catch((error) => {
+        console.error('Swords & Wizardry | Automatic spell application failed.', error);
+      })
+    );
   }
 
   start() {
-    if (this.#hookId != null) return;
-    this.#hookId = this.#deps.hooks.on('renderChatMessageHTML', this.#renderHandler);
+    if (this.#renderHookId != null || this.#createHookId != null) return;
+    this.#renderHookId = this.#deps.hooks.on(
+      'renderChatMessageHTML',
+      this.#renderHandler
+    );
+    this.#createHookId = this.#deps.hooks.on('createChatMessage', this.#createHandler);
   }
 
   stop() {
-    if (this.#hookId == null) return;
-    this.#deps.hooks.off('renderChatMessageHTML', this.#hookId);
-    this.#hookId = null;
+    if (this.#renderHookId != null) {
+      this.#deps.hooks.off('renderChatMessageHTML', this.#renderHookId);
+      this.#renderHookId = null;
+    }
+    if (this.#createHookId != null) {
+      this.#deps.hooks.off('createChatMessage', this.#createHookId);
+      this.#createHookId = null;
+    }
+  }
+
+  async #onCreate(message, requestingUserId) {
+    if (this.#deps.dmAppliesDamage()) return;
+
+    const currentUser = this.#deps.getCurrentUser();
+    const activeGM = this.#deps.getActiveGM();
+    if (!currentUser?.isGM || activeGM?.id !== currentUser.id) return;
+
+    const spell = message.getFlag?.(SYSTEM_ID, SPELL_FLAG_KEY)
+      ?? message.flags?.[SYSTEM_ID]?.[SPELL_FLAG_KEY];
+    if (
+      spell?.messageKind !== 'spell-result'
+      || !['damage', 'healing'].includes(spell.action?.kind)
+    ) return;
+
+    const failures = [];
+    for (const targetUuid of spell.targetUuids ?? []) {
+      const result = await this.#deps.applicationService.applyAutomatically(message, {
+        requestingUserId,
+        targetUuid
+      });
+      if (!['success', 'duplicate'].includes(result?.status)) failures.push(result);
+    }
+    if (!failures.length) return;
+
+    this.#deps.notify(
+      failures.some((result) => result?.status === 'unsafe') ? 'error' : 'warn',
+      this.#deps.localize('SWORDS_WIZARDRY.Spell.Notifications.AutoApplicationFailed', {
+        count: failures.length
+      })
+    );
   }
 
   #onRender(message, html) {
@@ -73,7 +125,12 @@ export class SpellChatController {
 
   #decorate(message, root, spell) {
     const isGM = this.#deps.getCurrentUser()?.isGM === true;
-    if (!isGM) {
+    const automaticApplication = (
+      spell.messageKind === 'spell-result'
+      && ['damage', 'healing'].includes(spell.action?.kind)
+      && !this.#deps.dmAppliesDamage()
+    );
+    if (!isGM || automaticApplication) {
       for (const controls of root.querySelectorAll?.('.spell-result__application-controls') ?? []) {
         controls.remove();
       }
@@ -112,6 +169,8 @@ export function createFoundrySpellChatController(spellService, applicationServic
     spellService,
     applicationService,
     getCurrentUser: () => game.user,
+    getActiveGM: () => game.users.activeGM,
+    dmAppliesDamage: () => game.settings.get(SYSTEM_ID, 'dmAppliesDamage'),
     localize: (key, data = {}) => game.i18n.format(key, data),
     notify: (level, message) => ui.notifications?.[level]?.(message)
   });

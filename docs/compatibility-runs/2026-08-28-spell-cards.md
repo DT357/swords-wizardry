@@ -114,6 +114,30 @@ one result into another. The browser gate performs the same fault injection in
 real Foundry, verifies that the new result retains its buttons, applies it, and
 confirms that only the new result's audit entry remains.
 
+## DM setting automatic-application follow-up
+
+Damage and healing Spell Effects now honor the renamed **DM must apply damage /
+healing** world setting. When checked, the active GM retains the manual
+application controls. When unchecked, the designated active GM immediately
+applies the full rolled result to every snapshotted target and the redundant
+manual controls are omitted.
+
+Automatic application is driven by Foundry's `createChatMessage` Document hook,
+which supplies the authenticated requesting user ID, rather than the legacy
+custom system socket. The GM revalidates the result author, source spell card,
+fingerprinted action, source Item ownership, target membership, amount, and
+idempotency key before writing HP or the result audit. Unit/integration coverage
+includes both setting states, automatic damage and healing, designated-GM
+selection, forged authors, and unowned source Items.
+
+The final release-shaped candidate passed all 57 Node tests and the complete
+2/2 GM/player Playwright suite on both Foundry v13.351 and v14.367. The browser
+test toggled the world setting at runtime, invoked damage and healing as the
+owning player, and verified on the GM client that each full result was applied
+once, audited on its originating result, and displayed without manual
+application buttons. The test restored the original world setting during
+cleanup.
+
 ## Evidence and known environment noise
 
 Passing screenshots and the Foundry server logs are retained under the local
