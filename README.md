@@ -1,8 +1,8 @@
-# Game System for Swords & Wizardry 
+# Game System for Swords & Wizardry
 
 > Compatible with the Swords & Wizardry rules
 
-![Foundry v14](https://img.shields.io/badge/foundry-v14-green)
+![Foundry v13 and v14](https://img.shields.io/badge/foundry-v13%20%7C%20v14-green)
 
 Swords & Wizardry, S&W, and Mythmere Games are trademarks of Mythmere Games LLC (mythmeregames.com).
 
@@ -18,9 +18,33 @@ The author is not affiliated in any way with Mythmere Games LLC.
 - Juan Lucha (@JuanLucha): Encumbrance and movment calculations
 - Dan (@DT357): DM applied damage feature and deprecation fixes
  
+## Spell cards
+
+Spell Items can define ordered, reusable **Spell Effects** for damage, healing,
+attacks, other rolls, rules references, and descriptive instructions. The
+editor shows only the options relevant to the selected effect type. Posting a
+spell creates an immutable chat snapshot without spending preparation. Casting
+posts the same card and removes exactly one prepared occurrence only after the
+card is created.
+
+Roll actions use an explicit, namespaced context: `@spell.level`,
+`@spell.casterLevel`, and `@spell.abilityModifier`. Selected targets are captured
+when an effect begins so later selection changes cannot redirect a result.
+Damage and healing results can be applied by a GM, are clamped to valid HP
+bounds, and record an idempotent audit entry on the result card.
+
+Saving throws, magic resistance, disbelief, durations, ongoing damage, summoned
+creatures, and Active Effects remain explicit table procedures in this release.
+
+See [the spell-card guide](docs/spell-cards.md) for setup, use, limitations, and
+the public macro API.
+
 ## Documentation
 
-Can be found [here](documentation.md).
+End-user documentation can be found [here](documentation.md). Developer setup,
+testing, packaging, the runtime diagnostic, and the safety-gated Playwright
+GM/player suite are documented in
+[docs/development.md](docs/development.md).
 
 ## Languages
 

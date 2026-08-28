@@ -87,7 +87,35 @@ The total spell slots per level controls how many spells of a certain level can 
 
 Clicking the Prepare icon on a known spell will prepare it if the total prepared spell limit for the level of the spell has not been met. Prepared spells are listed at the top of the Spells tab.
 
-Clicking the Cast icon on a prepared spell will cast it and remove it from the prepared spell list.
+Clicking **Post** creates a spell chat card without changing preparation.
+
+Clicking **Cast** on a prepared spell creates the card and then removes exactly
+one occurrence of that spell from the prepared list. Closing a required prompt
+or a failed card creation consumes nothing. If the card is created but the
+prepared-list update fails, the card displays a consumption warning rather than
+claiming the spell was spent.
+
+Spell Item sheets include a **Spell Effects** editor. Effects can be reordered
+and can represent damage, healing, an attack, a general roll, a rules reference,
+or descriptive instructions. The editor shows only the fields used by the
+selected effect type. Each effect selects whether it uses no target, one target,
+the current selected targets, or a manual table procedure. Saving throw outcomes
+are descriptive; the system does not roll a target's save or magic resistance
+automatically.
+
+Spell formulas can reference only `@spell.level`, `@spell.casterLevel`, and
+`@spell.abilityModifier`. Caster level is resolved from the source selected on
+the Item: a fixed value, a prompt, an unambiguous character level, or NPC hit
+dice. Ambiguous values prompt instead of being guessed. NPC challenge level is
+never silently treated as caster level.
+
+Targets are captured when an effect starts. The result card therefore continues
+to refer to the same Actor or Token even if the user's selected targets change.
+For damage and healing effects, a GM can apply half, full, or double the rolled
+total. HP changes are clamped between zero and maximum HP, and a repeated click
+cannot apply the same effect to the same target twice.
+
+See [docs/spell-cards.md](docs/spell-cards.md) for examples and limitations.
 
 ### Description
 A description of the Character can be viewed and edited in The Description tab of their sheet.
@@ -124,3 +152,6 @@ TODO talk more about each item type and any attributes it may have.
 ### Armor
 
 ### Spells
+
+Spell chat-card behavior is described in the Spells, preparation, and casting
+section above and in the dedicated spell-card guide.

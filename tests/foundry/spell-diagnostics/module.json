@@ -1,0 +1,28 @@
+{
+  "id": "swords-wizardry-spell-diagnostics",
+  "title": "Swords & Wizardry Spell Diagnostics",
+  "description": "Test-only runtime diagnostics for the Swords & Wizardry spell-card workflow.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": 13
+  },
+  "authors": [
+    {
+      "name": "Swords & Wizardry contributors"
+    }
+  ],
+  "esmodules": [
+    "diagnostics.mjs"
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "swords-wizardry",
+        "type": "system",
+        "compatibility": {
+          "minimum": "4.2.0"
+        }
+      }
+    ]
+  }
+}

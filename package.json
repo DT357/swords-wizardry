@@ -1,10 +1,23 @@
 {
   "name": "swords-wizardry",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "description": "CSS compiler for the Swords and Wizardry system",
   "scripts": {
-    "build": "sass module/scss/swords-wizardry.scss css/swords-wizardry.css --style=expanded --no-source-map",
-    "watch": "sass module/scss/swords-wizardry.scss css/swords-wizardry.css --style=expanded --source-map --watch"
+    "build": "node node_modules/sass/sass.js module/scss/swords-wizardry.scss css/swords-wizardry.css --style=expanded --no-source-map",
+    "watch": "node node_modules/sass/sass.js module/scss/swords-wizardry.scss css/swords-wizardry.css --style=expanded --source-map --watch",
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "test:unit": "node --test \"tests/unit/**/*.test.mjs\"",
+    "test:integration": "node --test \"tests/integration/**/*.test.mjs\"",
+    "test:e2e": "node node_modules/@playwright/test/cli.js test",
+    "test:foundry:provision": "node scripts/provision-foundry-test-world.mjs",
+    "check:e2e": "node node_modules/@playwright/test/cli.js test --list",
+    "check:syntax": "node scripts/check-syntax.mjs",
+    "check:json": "node scripts/check-json.mjs",
+    "check:localization": "node scripts/check-localization.mjs",
+    "check:manifest": "node scripts/check-manifest.mjs",
+    "check:templates": "node scripts/check-templates.mjs",
+    "check": "npm run check:json && npm run check:localization && npm run check:manifest && npm run check:syntax && npm run check:templates && npm run check:e2e && npm test && npm run build",
+    "package": "npm run check && node scripts/package-system.mjs"
   },
   "browserslist": [
     "last 3 versions"
@@ -13,6 +26,9 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
-    "sass": "^1.53.0"
+    "@playwright/test": "^1.62.1",
+    "archiver": "^7.0.1",
+    "handlebars": "^4.7.9",
+    "sass": "^1.103.1"
   }
 }
