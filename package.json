@@ -17,7 +17,9 @@
     "check:manifest": "node scripts/check-manifest.mjs",
     "check:templates": "node scripts/check-templates.mjs",
     "check": "npm run check:json && npm run check:localization && npm run check:manifest && npm run check:syntax && npm run check:templates && npm run check:e2e && npm test && npm run build",
-    "package": "npm run check && node scripts/package-system.mjs"
+    "package": "npm run check && node scripts/package-system.mjs",
+    "verify:package": "npm run package && node scripts/verify-deterministic-package.mjs",
+    "verify:release": "npm run package && powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/Verify-FoundryRelease.ps1"
   },
   "browserslist": [
     "last 3 versions"

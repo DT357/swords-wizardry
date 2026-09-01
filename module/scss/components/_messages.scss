@@ -9,10 +9,60 @@
 .damage-special-text {
   margin-top: 5px;
 }
+
+.chat-card__title {
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
 .damage-target {
   border: 1px solid #666666;
+  list-style-position: inside;
   padding: 5px;
   margin-top: 5px;
+}
+
+.item-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+
+  img {
+    flex: 0 0 auto;
+  }
+}
+
+.item-card__header h3 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.feature-card__description,
+.item-card__description {
+  margin-block: 0.5rem;
+  overflow-wrap: anywhere;
+
+  &:empty {
+    display: none;
+  }
+
+  > :first-child {
+    margin-top: 0;
+  }
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+.weapon-card__target-name {
+  font-weight: 700;
+}
+
+.weapon-card__targets.damage-targets {
+  padding-inline-start: 0;
 }
 
 .damage-buttons {
@@ -22,6 +72,32 @@
 
   button {
     flex: 1;
+    min-width: 0;
     font-size: 11px;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+}
+
+.threshold-roll-card__result {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.threshold-roll-card__outcome {
+  margin-inline-start: auto;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-shadow: none;
+
+  &.is-success {
+    color: var(--color-level-success, #1b8f23);
+  }
+
+  &.is-failure {
+    color: var(--color-level-error, #ce0707);
   }
 }

@@ -2,7 +2,7 @@
   <header class="spell-card__header">
     {{#if spell.item.img}}<img src="{{spell.item.img}}" alt="" width="36" height="36">{{/if}}
     <div>
-      <h3>{{spell.item.name}}</h3>
+      <h3 class="chat-card__title">{{spell.item.name}}</h3>
       {{#if spell.casterName}}<p>{{localize "SWORDS_WIZARDRY.Spell.Card.CastBy" caster=spell.casterName}}</p>{{/if}}
     </div>
   </header>

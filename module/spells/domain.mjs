@@ -1,9 +1,6 @@
 import {
   SPELL_ACTION_KINDS,
   SPELL_ACTION_LIMITS,
-  SPELL_APPLICATION_MULTIPLIERS,
-  SPELL_APPLICATION_OPERATION,
-  SPELL_APPLICATION_SCHEMA_VERSION,
   SPELL_ATTACK_MODES,
   SPELL_FORMULA_PATHS,
   SPELL_LEVEL_SOURCES,
@@ -19,22 +16,9 @@ const TARGET_FIELDS = new Set(['mode']);
 const SAVE_FIELDS = new Set(['outcome', 'notes']);
 const ATTACK_FIELDS = new Set(['mode', 'notes']);
 const EFFECT_FIELDS = new Set(['reference']);
-const APPLICATION_FIELDS = new Set([
-  'schemaVersion',
-  'requestId',
-  'operation',
-  'messageUuid',
-  'actionId',
-  'actionFingerprint',
-  'targetUuid',
-  'kind',
-  'amount',
-  'multiplier'
-]);
 const FORMULA_ACTION_KINDS = new Set(['damage', 'healing', 'attack', 'roll']);
 const UUID_PATTERN = /^[A-Za-z][A-Za-z0-9_-]*(?:\.[A-Za-z0-9_-]+)+$/;
 const ACTION_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
-const REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]{8,64}$/;
 const FORMULA_REFERENCE_PATTERN = /@([A-Za-z][A-Za-z0-9_.]*)/g;
 
 export class SpellValidationError extends Error {
@@ -380,90 +364,6 @@ export function consumePreparedSpell(prepared, spellId) {
   if (index === -1) return { status: 'missing', index, prepared: next };
   next.splice(index, 1);
   return { status: 'consumed', index, prepared: next };
-}
-
-export function applyHitPointChange({
-  kind,
-  current,
-  maximum,
-  amount,
-  multiplier = 1
-}) {
-  if (!['damage', 'healing'].includes(kind)) {
-    throw new SpellValidationError('INVALID_HP_KIND', { kind });
-  }
-  const oldHP = normalizeNonNegativeInteger(current, 'INVALID_CURRENT_HP');
-  const maximumHP = normalizeNonNegativeInteger(maximum, 'INVALID_MAXIMUM_HP');
-  const numericAmount = Number(amount);
-  if (
-    !Number.isFinite(numericAmount)
-    || numericAmount < 0
-    || numericAmount > SPELL_ACTION_LIMITS.hitPointAmount
-  ) {
-    throw new SpellValidationError('INVALID_HP_AMOUNT');
-  }
-  if (!SPELL_APPLICATION_MULTIPLIERS.includes(multiplier)) {
-    throw new SpellValidationError('INVALID_HP_MULTIPLIER');
-  }
-  const requestedAmount = Math.floor(numericAmount * multiplier);
-  const newHP = kind === 'damage'
-    ? Math.max(0, oldHP - requestedAmount)
-    : Math.max(oldHP, Math.min(maximumHP, oldHP + requestedAmount));
-  return {
-    oldHP,
-    newHP,
-    requestedAmount,
-    appliedAmount: Math.abs(newHP - oldHP)
-  };
-}
-
-export function validateApplicationRequest(request = {}) {
-  assertPlainObject(request, 'INVALID_APPLICATION_REQUEST');
-  assertKnownFields(request, APPLICATION_FIELDS);
-  if (request.schemaVersion !== SPELL_APPLICATION_SCHEMA_VERSION) {
-    throw new SpellValidationError('INVALID_APPLICATION_SCHEMA');
-  }
-  if (!REQUEST_ID_PATTERN.test(String(request.requestId ?? ''))) {
-    throw new SpellValidationError('INVALID_REQUEST_ID');
-  }
-  if (request.operation !== SPELL_APPLICATION_OPERATION) {
-    throw new SpellValidationError('INVALID_APPLICATION_OPERATION');
-  }
-  assertUuid(request.messageUuid, 'INVALID_MESSAGE_UUID');
-  assertUuid(request.targetUuid, 'INVALID_TARGET_UUID');
-  const actionId = normalizeActionId(request.actionId);
-  const actionFingerprint = normalizeText(request.actionFingerprint, {
-    field: 'actionFingerprint',
-    max: 64,
-    required: true
-  });
-  if (!['damage', 'healing'].includes(request.kind)) {
-    throw new SpellValidationError('INVALID_HP_KIND');
-  }
-  const amount = Number(request.amount);
-  if (
-    !Number.isFinite(amount)
-    || amount < 0
-    || amount > SPELL_ACTION_LIMITS.hitPointAmount
-  ) {
-    throw new SpellValidationError('INVALID_HP_AMOUNT');
-  }
-  const multiplier = Number(request.multiplier);
-  if (!SPELL_APPLICATION_MULTIPLIERS.includes(multiplier)) {
-    throw new SpellValidationError('INVALID_HP_MULTIPLIER');
-  }
-  return {
-    schemaVersion: request.schemaVersion,
-    requestId: request.requestId,
-    operation: request.operation,
-    messageUuid: request.messageUuid,
-    actionId,
-    actionFingerprint,
-    targetUuid: request.targetUuid,
-    kind: request.kind,
-    amount,
-    multiplier
-  };
 }
 
 function normalizeNested(source, allowedFields, normalized) {

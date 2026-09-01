@@ -99,83 +99,92 @@
   <h3 class="align-center">
     {{ localize 'SWORDS_WIZARDRY.CharacterSheet.Equipment.Items' }}
   </h3>
-  <ol class='items-list'>
+  <ol class='items-list columnar-items-list'>
     <li class="item items-header grid grid-6col">
       <div class='item-name grid-span-3'>{{localize 'SWORDS_WIZARDRY.CharacterSheet.Equipment.Table.Name'}}</div> 
       <div class='item-prop'>{{localize 'SWORDS_WIZARDRY.CharacterSheet.Equipment.Table.Quantity'}}</div>
       <div class='item-prop'>{{localize 'SWORDS_WIZARDRY.CharacterSheet.Equipment.Table.Weight'}}</div>
       <div class='item-controls'>
-        <a
+        <button
+          type="button"
           class='item-control'
           data-action="itemCreate"
           data-type='item'
-          title='{{localize "SWORDS_WIZARDRY.CharacterSheet.Equipment.Table.Create" type='Item'}}'
+          aria-label='{{localize "SWORDS_WIZARDRY.CharacterSheet.Equipment.Table.Create" type='Item'}}'
         >
-          <i class='fas fa-plus'></i>
-        </a>
+          <i class='fas fa-plus' aria-hidden="true"></i>
+        </button>
       </div>
     </li>
     {{#each gear as |item id|}}
     <li class="item grid grid-6col" data-item-id="{{item._id}}">
       <div class='item-name grid-span-3'>
         <div class='item-image'>
-          <a
+          <button
+            type="button"
             class='rollable'
             data-action="roll"
             data-id="{{item._id}}"
             data-roll-type='item'
+            aria-label="{{localize 'SWORDS_WIZARDRY.Chat.RollNamed' name=item.name}}"
           >
             <img
               src='{{item.img}}'
-              title='{{item.name}}'
+              alt=""
               width='24'
               height='24'
             />
-          </a>
+          </button>
         </div>
         <span class='item-name-span'>{{item.name}}</span>
       </div>
-      <div class='item-prop'>
-        <a
+      <div class='item-prop item-quantity'>
+        <button
+          type="button"
           class='item-control'
           data-action="itemDecrement"
           data-id="{{item._id}}"
+          aria-label="{{localize 'SWORDS_WIZARDRY.CharacterSheet.Equipment.Table.Decrement' name=item.name}}"
         >
-          <i class="fas fa-minus"></i>
-        </a>
-        {{item.system.quantity}}
-        <a
+          <i class="fas fa-minus" aria-hidden="true"></i>
+        </button>
+        <span class='item-quantity__value'>{{item.system.quantity}}</span>
+        <button
+          type="button"
           class='item-control'
           data-action="itemIncrement"
           data-id="{{item._id}}"
+          aria-label="{{localize 'SWORDS_WIZARDRY.CharacterSheet.Equipment.Table.Increment' name=item.name}}"
          >
-          <i class="fas fa-plus"></i>
-        </a>
+          <i class="fas fa-plus" aria-hidden="true"></i>
+        </button>
       </div>
       <div class='item-prop'>{{item.system.weight}}</div>
       <div class='item-controls'>
-        <a
+        <button
+          type="button"
           class='item-control'
           data-action="itemEdit"
           data-id="{{item._id}}"
-          title='{{
+          aria-label='{{
             localize "SWORDS_WIZARDRY.CharacterSheet.Equipment.Table.Update"
             type='Item'
           }}'
         >
-          <i class='fas fa-edit'></i>
-        </a>
-        <a
+          <i class='fas fa-edit' aria-hidden="true"></i>
+        </button>
+        <button
+          type="button"
           class='item-control'
           data-action="itemDelete"
           data-id="{{item._id}}"
-          title='{{
+          aria-label='{{
             localize "SWORDS_WIZARDRY.CharacterSheet.Equipment.Table.Delete"
             type='Item
           '}}'
         >
-          <i class='fas fa-trash'></i>
-        </a>
+          <i class='fas fa-trash' aria-hidden="true"></i>
+        </button>
       </div>
     </li>
     {{/each}}

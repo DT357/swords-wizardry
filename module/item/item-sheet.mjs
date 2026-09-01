@@ -95,14 +95,7 @@ export class SwordsWizardryItemSheet extends HandlebarsApplicationMixin(ItemShee
 async function runSpellAction(target, operation) {
   target.disabled = true;
   try {
-    const result = await operation();
-    if (result?.status === 'failure') {
-      const key = `SWORDS_WIZARDRY.Spell.Validation.${result.code}`;
-      const localized = game.i18n.localize(key);
-      ui.notifications.warn(localized === key
-        ? game.i18n.localize('SWORDS_WIZARDRY.Spell.Validation.UNKNOWN')
-        : localized);
-    }
+    await operation();
   } finally {
     target.disabled = false;
   }

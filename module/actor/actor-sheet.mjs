@@ -1,10 +1,13 @@
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
+import { readFoundryRollMode } from '../rolls/chat-visibility.mjs';
 
 export class SwordsWizardryActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   static DEFAULT_OPTIONS = {
     actions: {
+      abilityRoll: this.#abilityRoll,
+      armorEquipped: this.#armorEquipped,
       editImage: this.#onEditImage,
       itemCreate: this.#itemCreate,
       itemDecrement: this.#itemDecrement,
@@ -175,7 +178,12 @@ export class SwordsWizardryActorSheet extends HandlebarsApplicationMixin(ActorSh
 
   static async #onSubmitForm(event, form, formData) {
     event.preventDefault();
-    await this.document.update(formData.object);
+    const changedField = event.submitter?.name
+      ?? form?.querySelector?.(':focus')?.name
+      ?? null;
+    await this.document.update(formData.object, {
+      swordsWizardry: { changedField }
+    });
   }
 
   static async #onEditImage(event, target) {
@@ -228,8 +236,23 @@ export class SwordsWizardryActorSheet extends HandlebarsApplicationMixin(ActorSh
     if (newQuantity > 0) await item.update({ 'system.quantity': newQuantity });
   }
 
+  static async #armorEquipped(_event, target) {
+    const item = this.actor.items.get(target.dataset.id);
+    if (!item || item.type !== 'armor' || !this.actor.isOwner) return;
+    target.disabled = true;
+    try {
+      await item.update({ 'system.equipped': target.checked });
+    } finally {
+      target.disabled = false;
+    }
+  }
+
   static async #moraleRoll(_event, _target) {
     this.actor.rollMorale();
+  }
+
+  static async #abilityRoll(_event, target) {
+    return this.actor.rollAbility(target.dataset.ability);
   }
 
   static async #roll(event, target) {
@@ -244,7 +267,7 @@ export class SwordsWizardryActorSheet extends HandlebarsApplicationMixin(ActorSh
       rollObj.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         flavor,
-        rollMode: game.settings.get('core', 'rollMode'),
+        rollMode: readFoundryRollMode(game.settings),
       });
       return roll;
     }
@@ -285,13 +308,7 @@ export class SwordsWizardryActorSheet extends HandlebarsApplicationMixin(ActorSh
 async function runSpellAction(target, operation) {
   target.disabled = true;
   try {
-    const result = await operation();
-    if (result?.status !== 'failure') return;
-    const key = `SWORDS_WIZARDRY.Spell.Validation.${result.code}`;
-    const localized = game.i18n.localize(key);
-    ui.notifications.warn(localized === key
-      ? game.i18n.localize('SWORDS_WIZARDRY.Spell.Validation.UNKNOWN')
-      : localized);
+    await operation();
   } finally {
     target.disabled = false;
   }

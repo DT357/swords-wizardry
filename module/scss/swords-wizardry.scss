@@ -1,9 +1,6 @@
 @use 'sass:meta';
 @use 'utils/typography';
 
-// Add custom fonts by visiting and search https://fonts.google.com
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
 /* Global styles */
 @include meta.load-css('global/window');
 @include meta.load-css('global/grid');
@@ -16,7 +13,6 @@
     overflow: scroll;
   }
   @include meta.load-css('components/apps');
-  @include meta.load-css('components/effects');
   @include meta.load-css('components/forms');
   @include meta.load-css('components/items');
   @include meta.load-css('components/messages');

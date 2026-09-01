@@ -31,7 +31,7 @@ class BaseCharacterData extends TypeDataModel {
         required: true, integer: true, min: 0, max: 19, initial: 0
       }),
       tHAC0: new NumberField({
-        required: true, integer: true, min: 1, max: 20, initial: 19
+        required: true, integer: true, min: 0, max: 20, initial: 19
       }),
       save: new SchemaField({
         value: new NumberField({
@@ -118,7 +118,7 @@ export class CharacterData extends BaseCharacterData {
       class: new StringField(),
       ancestry: new StringField(),
       level: new SchemaField({
-        value: new StringField({ intitial: '1' })
+        value: new StringField({ initial: '1' })
       }),
       age: new StringField(),
       deity: new StringField(),

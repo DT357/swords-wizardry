@@ -1,307 +1,283 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createApplicationId } from '../../../module/spells/application.mjs';
+import { createApplicationId } from '../../../module/hit-points/domain.mjs';
 import { SpellChatController } from '../../../module/spells/chat-controller.mjs';
+import { SPELL_MESSAGE_SCHEMA_VERSION } from '../../../module/spells/constants.mjs';
 
-test('chat controller registers once and balances its hook on stop', () => {
+const SYSTEM_ID = 'swords-wizardry';
+
+function rootFixture() {
+  const listeners = [];
+  const appended = [];
+  return {
+    dataset: {},
+    listeners,
+    appended,
+    ownerDocument: {
+      createElement: () => ({ className: '', textContent: '', setAttribute() {} })
+    },
+    append(element) { appended.push(element); },
+    addEventListener(type, callback) { listeners.push([type, callback]); },
+    matches: () => true,
+    querySelector: () => null,
+    querySelectorAll: () => [],
+    contains: () => true
+  };
+}
+
+function dependencies(overrides = {}) {
+  return {
+    hooks: { on: () => 1, off() {} },
+    spellService: { invoke: async () => ({ status: 'success' }) },
+    authority: { request: async () => ({ status: 'success' }) },
+    getCurrentUser: () => ({ id: 'gm1', isGM: true }),
+    getUserById: () => ({ id: 'gm1', isGM: true }),
+    dmAppliesDamage: () => true,
+    localize: (key) => key,
+    notify() {},
+    ...overrides
+  };
+}
+
+test('chat controller registers one balanced render hook', () => {
   const calls = [];
-  const hooks = {
-    on(name, callback) {
-      calls.push(['on', name, callback]);
-      return 42;
-    },
-    off(name, id) {
-      calls.push(['off', name, id]);
-    }
-  };
-  const controller = new SpellChatController({
-    hooks,
-    spellService: { invoke: async () => ({ status: 'success' }) },
-    applicationService: { apply: async () => ({ status: 'success' }) },
-    getCurrentUser: () => ({ id: 'gm', isGM: true }),
-    localize: (key) => key,
-    notify() {}
-  });
-
-  controller.start();
-  controller.start();
-  controller.stop();
-  controller.stop();
-
-  assert.deepEqual(
-    calls.filter(([type]) => type === 'on').map(([, name]) => name),
-    ['renderChatMessageHTML', 'createChatMessage']
-  );
-  assert.deepEqual(
-    calls.filter(([type]) => type === 'off').map(([, name]) => name),
-    ['renderChatMessageHTML', 'createChatMessage']
-  );
-});
-
-test('unchecked DM damage setting auto-applies full spell damage on the active GM', async () => {
-  const callbacks = {};
-  const applications = [];
-  const controller = new SpellChatController({
+  const controller = new SpellChatController(dependencies({
     hooks: {
-      on(name, callback) { callbacks[name] = callback; return name; },
-      off() {}
-    },
-    spellService: { invoke: async () => ({ status: 'success' }) },
-    applicationService: {
-      async applyAutomatically(message, options) {
-        applications.push({ message, options });
-        return { status: 'success' };
-      }
-    },
-    getCurrentUser: () => ({ id: 'gm', isGM: true }),
-    getActiveGM: () => ({ id: 'gm' }),
-    dmAppliesDamage: () => false,
-    localize: (key) => key,
-    notify() {}
-  });
-  controller.start();
-  const message = {
-    uuid: 'ChatMessage.damage-result',
-    getFlag: () => ({
-      messageKind: 'spell-result',
-      action: { kind: 'damage' },
-      targetUuids: ['Scene.scene.Token.one', 'Scene.scene.Token.two']
-    })
-  };
-
-  await callbacks.createChatMessage(message, {}, 'player');
-
-  assert.deepEqual(applications, [
-    {
-      message,
-      options: {
-        requestingUserId: 'player',
-        targetUuid: 'Scene.scene.Token.one'
-      }
-    },
-    {
-      message,
-      options: {
-        requestingUserId: 'player',
-        targetUuid: 'Scene.scene.Token.two'
-      }
+      on(name, callback) { calls.push(['on', name, callback]); return 42; },
+      off(name, id) { calls.push(['off', name, id]); }
     }
+  }));
+
+  controller.start();
+  controller.start();
+  controller.stop();
+  controller.stop();
+
+  assert.deepEqual(calls.map(([kind, name]) => [kind, name]), [
+    ['on', 'renderChatMessageHTML'],
+    ['off', 'renderChatMessageHTML']
   ]);
 });
 
-test('automatic spell damage does not run when manual application is required', async () => {
-  const callbacks = {};
-  let applications = 0;
-  const controller = new SpellChatController({
-    hooks: {
-      on(name, callback) { callbacks[name] = callback; return name; },
-      off() {}
-    },
-    spellService: { invoke: async () => ({ status: 'success' }) },
-    applicationService: {
-      async applyAutomatically() { applications += 1; return { status: 'success' }; }
-    },
-    getCurrentUser: () => ({ id: 'gm', isGM: true }),
-    getActiveGM: () => ({ id: 'gm' }),
-    dmAppliesDamage: () => true,
-    localize: (key) => key,
-    notify() {}
-  });
-  controller.start();
-
-  await callbacks.createChatMessage({
-    getFlag: () => ({
-      messageKind: 'spell-result',
-      action: { kind: 'damage' },
-      targetUuids: ['Scene.scene.Token.one']
-    })
-  }, {}, 'player');
-
-  assert.equal(applications, 0);
-});
-
-test('automatic spell damage and healing run only on the designated active GM', async () => {
-  const callbacks = {};
-  const applications = [];
-  let activeGmId = 'other-gm';
-  const controller = new SpellChatController({
-    hooks: {
-      on(name, callback) { callbacks[name] = callback; return name; },
-      off() {}
-    },
-    spellService: { invoke: async () => ({ status: 'success' }) },
-    applicationService: {
-      async applyAutomatically(message) {
-        applications.push(message.getFlag().action.kind);
+test('player spell-card action delegates to the revalidating authority workflow', async () => {
+  let render;
+  const calls = [];
+  const root = rootFixture();
+  const message = {
+    uuid: 'ChatMessage.spell1',
+    author: { id: 'player1' },
+    flags: {
+      [SYSTEM_ID]: {
+        spell: { schemaVersion: SPELL_MESSAGE_SCHEMA_VERSION, messageKind: 'spell-card' }
+      }
+    }
+  };
+  const controller = new SpellChatController(dependencies({
+    hooks: { on(_name, callback) { render = callback; return 1; }, off() {} },
+    spellService: {
+      async invoke(candidate, actionId) {
+        calls.push([candidate.uuid, actionId]);
         return { status: 'success' };
       }
     },
-    getCurrentUser: () => ({ id: 'gm', isGM: true }),
-    getActiveGM: () => ({ id: activeGmId }),
-    dmAppliesDamage: () => false,
-    localize: (key) => key,
-    notify() {}
-  });
+    getUserById: () => ({ id: 'player1', isGM: false })
+  }));
   controller.start();
-  const result = (kind) => ({
-    getFlag: () => ({
-      messageKind: 'spell-result',
-      action: { kind },
-      targetUuids: ['Scene.scene.Token.one']
-    })
-  });
+  render(message, root);
 
-  await callbacks.createChatMessage(result('damage'), {}, 'player');
-  activeGmId = 'gm';
-  await callbacks.createChatMessage(result('healing'), {}, 'player');
+  const listener = root.listeners[0][1];
+  const button = {
+    dataset: { action: 'spellAction', spellActionId: 'effect1' },
+    disabled: false,
+    closest: () => button
+  };
+  await listener({ target: button });
 
-  assert.deepEqual(applications, ['healing']);
+  assert.deepEqual(calls, [['ChatMessage.spell1', 'effect1']]);
 });
 
-test('render binding attaches one delegated listener to a spell card root', () => {
-  let renderCallback;
-  const listeners = [];
-  const root = {
-    dataset: {},
-    addEventListener(type, callback) {
-      listeners.push([type, callback]);
-    },
-    querySelector() { return null; },
-    querySelectorAll() { return []; }
+test('apply button sends only the trusted result and target references', async () => {
+  let render;
+  const calls = [];
+  const root = rootFixture();
+  const message = {
+    uuid: 'ChatMessage.result1',
+    author: { id: 'gm1' },
+    flags: {
+      [SYSTEM_ID]: {
+        spell: { schemaVersion: SPELL_MESSAGE_SCHEMA_VERSION, messageKind: 'spell-result' }
+      }
+    }
   };
-  const hooks = {
-    on(name, callback) {
-      if (name === 'renderChatMessageHTML') renderCallback = callback;
-      return name;
-    },
-    off() {}
-  };
-  const controller = new SpellChatController({
-    hooks,
-    spellService: { invoke: async () => ({ status: 'success' }) },
-    applicationService: { apply: async () => ({ status: 'success' }) },
-    getCurrentUser: () => ({ id: 'gm', isGM: true }),
-    localize: (key) => key,
-    notify() {}
-  });
+  const controller = new SpellChatController(dependencies({
+    hooks: { on(_name, callback) { render = callback; return 1; }, off() {} },
+    authority: {
+      async request(operation, payload) {
+        calls.push([operation, payload]);
+        return { status: 'success' };
+      }
+    }
+  }));
   controller.start();
-  const message = { getFlag: () => ({ messageKind: 'spell-card' }) };
+  render(message, root);
 
-  renderCallback(message, root);
-  renderCallback(message, root);
+  const listener = root.listeners[0][1];
+  const button = {
+    dataset: {
+      action: 'spellApply', mode: 'halfDamage', targetUuid: 'Actor.target1'
+    },
+    disabled: false,
+    closest: () => button
+  };
+  await listener({ target: button });
 
-  assert.equal(listeners.length, 1);
-  assert.equal(listeners[0][0], 'click');
+  assert.deepEqual(calls, [[
+    'hitPoints.apply',
+    {
+      messageUuid: 'ChatMessage.result1',
+      targetUuid: 'Actor.target1',
+      mode: 'halfDamage'
+    }
+  ]]);
 });
 
-test('a new result card ignores application entries belonging to an older message', () => {
-  let renderCallback;
-  let controlsRemoved = false;
-  const targetUuid = 'Scene.scene-1.Token.token-1';
+test('non-GM-authored result cards are display-only', () => {
+  let render;
+  let removed = false;
+  const root = rootFixture();
+  root.querySelectorAll = (selector) => (
+    selector === '.spell-result__application-controls'
+      ? [{ remove() { removed = true; } }]
+      : []
+  );
+  const controller = new SpellChatController(dependencies({
+    hooks: { on(_name, callback) { render = callback; return 1; }, off() {} },
+    getUserById: () => ({ id: 'player1', isGM: false })
+  }));
+  controller.start();
+  render({
+    uuid: 'ChatMessage.forged',
+    author: { id: 'player1' },
+    flags: {
+      [SYSTEM_ID]: {
+        spell: { schemaVersion: SPELL_MESSAGE_SCHEMA_VERSION, messageKind: 'spell-result' }
+      }
+    }
+  }, root);
+
+  assert.equal(removed, true);
+  assert.equal(root.listeners.length, 0);
+  assert.equal(root.appended.length, 1);
+  assert.equal(root.appended[0].className, 'spell-card__legacy-warning');
+});
+
+test('historical spell cards show a localized repost notice', () => {
+  let render;
+  const root = rootFixture();
+  const controller = new SpellChatController(dependencies({
+    hooks: { on(_name, callback) { render = callback; return 1; }, off() {} },
+    localize: () => 'Post this spell again.'
+  }));
+  controller.start();
+  render({
+    uuid: 'ChatMessage.legacySpell',
+    author: { id: 'player1' },
+    flags: {
+      [SYSTEM_ID]: {
+        spell: { schemaVersion: 1, messageKind: 'spell-card' }
+      }
+    }
+  }, root);
+
+  assert.equal(root.listeners.length, 0);
+  assert.equal(root.appended[0].textContent, 'Post this spell again.');
+});
+
+test('applied ledger entry removes controls after reload', () => {
+  let render;
+  let removed = false;
+  const targetUuid = 'Actor.target1';
+  const messageUuid = 'ChatMessage.result1';
+  const applicationId = createApplicationId({ messageUuid, targetUuid });
+  const controls = { remove() { removed = true; } };
   const status = { textContent: '' };
-  const controls = { remove() { controlsRemoved = true; } };
   const target = {
     dataset: { spellTargetUuid: targetUuid },
     querySelectorAll: () => [controls],
     querySelector: () => status
   };
-  const root = {
-    dataset: {},
-    addEventListener() {},
-    querySelector: () => null,
-    querySelectorAll(selector) {
-      return selector === '[data-spell-target-uuid]' ? [target] : [];
-    }
-  };
-  const actionId = 'damage-action';
-  const priorApplicationId = createApplicationId({
-    messageUuid: 'ChatMessage.result-1',
-    actionId,
-    targetUuid
-  });
-  const spell = {
-    messageKind: 'spell-result',
-    application: {
-      entries: {
-        [priorApplicationId]: {
-          applicationId: priorApplicationId,
-          actionId,
-          targetUuid,
-          appliedAmount: 2
+  const root = rootFixture();
+  root.querySelectorAll = (selector) => (
+    selector === '[data-spell-target-uuid]' ? [target] : []
+  );
+  const controller = new SpellChatController(dependencies({
+    hooks: { on(_name, callback) { render = callback; return 1; }, off() {} },
+    localize: () => 'Applied'
+  }));
+  controller.start();
+  render({
+    uuid: messageUuid,
+    author: { id: 'gm1' },
+    flags: {
+      [SYSTEM_ID]: {
+        spell: { schemaVersion: SPELL_MESSAGE_SCHEMA_VERSION, messageKind: 'spell-result' },
+        hitPoints: {
+          entries: {
+            [applicationId]: {
+              applicationId,
+              status: 'applied',
+              targetUuid,
+              change: { appliedAmount: 3 }
+            }
+          }
         }
       }
     }
-  };
-  const controller = new SpellChatController({
-    hooks: {
-      on(name, callback) {
-        if (name === 'renderChatMessageHTML') renderCallback = callback;
-        return name;
-      },
-      off() {}
-    },
-    spellService: { invoke: async () => ({ status: 'success' }) },
-    applicationService: { apply: async () => ({ status: 'success' }) },
-    getCurrentUser: () => ({ id: 'gm', isGM: true }),
-    localize: () => 'Applied: 2',
-    notify() {}
-  });
-  controller.start();
-
-  renderCallback({
-    uuid: 'ChatMessage.result-2',
-    getFlag: () => spell
   }, root);
 
-  assert.equal(controlsRemoved, false);
-  assert.equal(status.textContent, '');
+  assert.equal(removed, true);
+  assert.equal(status.textContent, 'Applied');
 });
 
-test('automatic damage and healing cards hide manual controls', () => {
-  let renderCallback;
-  let requiresManualApplication = false;
-  const render = (kind) => {
-    let controlsRemoved = false;
-    const controls = { remove() { controlsRemoved = true; } };
-    const root = {
-      dataset: {},
-      addEventListener() {},
-      querySelector: () => null,
-      querySelectorAll(selector) {
-        return selector === '.spell-result__application-controls' ? [controls] : [];
-      }
-    };
-    renderCallback({
-      uuid: `ChatMessage.${kind}`,
-      getFlag: () => ({
-        messageKind: 'spell-result',
-        action: { kind },
-        application: { entries: {} }
-      })
-    }, root);
-    return controlsRemoved;
-  };
-  const controller = new SpellChatController({
-    hooks: {
-      on(name, callback) {
-        if (name === 'renderChatMessageHTML') renderCallback = callback;
-        return name;
-      },
-      off() {}
-    },
-    spellService: { invoke: async () => ({ status: 'success' }) },
-    applicationService: { apply: async () => ({ status: 'success' }) },
-    getCurrentUser: () => ({ id: 'gm', isGM: true }),
-    dmAppliesDamage: () => requiresManualApplication,
-    localize: (key) => key,
-    notify() {}
-  });
+test('automatic result cards and non-GM viewers do not expose manual controls', () => {
+  let render;
+  let manual = false;
+  let currentUser = { id: 'gm1', isGM: true };
+  const controller = new SpellChatController(dependencies({
+    hooks: { on(_name, callback) { render = callback; return 1; }, off() {} },
+    getCurrentUser: () => currentUser,
+    dmAppliesDamage: () => manual
+  }));
   controller.start();
 
-  assert.equal(render('damage'), true);
-  assert.equal(render('healing'), true);
-  requiresManualApplication = true;
-  assert.equal(render('damage'), false);
-  assert.equal(render('healing'), false);
+  const renderControls = () => {
+    let removed = false;
+    const root = rootFixture();
+    root.querySelectorAll = (selector) => (
+      selector === '.spell-result__application-controls'
+        ? [{ remove() { removed = true; } }]
+        : []
+    );
+    render({
+      uuid: 'ChatMessage.result2',
+      author: { id: 'gm1' },
+      flags: {
+        [SYSTEM_ID]: {
+          spell: {
+            schemaVersion: SPELL_MESSAGE_SCHEMA_VERSION,
+            messageKind: 'spell-result',
+            action: { kind: 'damage' }
+          }
+        }
+      }
+    }, root);
+    return removed;
+  };
+
+  assert.equal(renderControls(), true);
+  manual = true;
+  assert.equal(renderControls(), false);
+  currentUser = { id: 'player1', isGM: false };
+  assert.equal(renderControls(), true);
 });

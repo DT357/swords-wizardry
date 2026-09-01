@@ -7,7 +7,7 @@
   {{# if useAscendingAC }}
   <div class="grid grid-1col">
     <div class="resource">
-      <label for="system.tHAACB" class="resource-label">Attack Bonus</label>
+      <label for="system.tHAACB" class="resource-label">{{localize 'SWORDS_WIZARDRY.Stats.AttackBonus'}}</label>
       <input type="text" class="nomargin" name="system.tHAACB"  value="{{system.tHAACB}}" data-label="tHAACB" data-dtype="Number" />
     </div>
   </div>
@@ -35,40 +35,43 @@
   </div>
   {{/ if }}
   <h3 class="align-center">{{localize 'SWORDS_WIZARDRY.CharacterSheet.Combat.Table.Title'}}</h3>
-  <ol class='items-list'>
+  <ol class='items-list columnar-items-list'>
     <li class='item items-header grid grid-6col'>
       <div class='item-name grid-span-2'>{{localize 'SWORDS_WIZARDRY.CharacterSheet.Combat.Table.Name'}}</div>
       <div class='item-prop'>{{localize 'SWORDS_WIZARDRY.CharacterSheet.Combat.Table.Weight'}}</div>
       <div class='item-modifier'>{{localize 'SWORDS_WIZARDRY.CharacterSheet.Combat.Table.ToHitModifier'}}</div>
       <div class='item-damage'>{{localize 'SWORDS_WIZARDRY.CharacterSheet.Combat.Table.DamageRollFormula'}}</div>
       <div class='item-controls'>
-        <a
+        <button
+          type="button"
           class='item-control item-create'
           data-action='itemCreate'
           data-type='weapon'
-          title='{{localize "SWORDS_WIZARDRY.CharacterSheet.Combat.Table.Create" type='weapon'}}'
+          aria-label='{{localize "SWORDS_WIZARDRY.CharacterSheet.Combat.Table.Create" type='weapon'}}'
         >
-          <i class='fas fa-plus'></i>
-        </a>
+          <i class='fas fa-plus' aria-hidden="true"></i>
+        </button>
       </div>
     </li>
     {{#each weapons as |item id|}}
     <li class='item grid grid-6col' data-item-id='{{item._id}}'>
       <div class='item-name grid-span-2'>
         <div class='item-image'>
-          <a
+          <button
+            type="button"
             class='rollable'
             data-action='roll'
             data-id='{{item._id}}'
             data-roll-type='item'
+            aria-label="{{localize 'SWORDS_WIZARDRY.Chat.RollNamed' name=item.name}}"
           >
             <img
               src='{{item.img}}'
-              title='{{item.name}}'
+              alt=""
               width='24'
               height='24'
             />
-          </a>
+          </button>
         </div>
         <span class='item-name-span'>{{item.name}}</span>
       </div>
@@ -77,83 +80,101 @@
       <div class='item-modifier item-prop'>{{item.system.modifier}}</div>
       <div class='item-damage item-prop'>{{item.system.damageFormula}}</div>
       <div class='item-controls'>
-        <a
+        <button
+          type="button"
           class='item-control item-edit'
           data-action='itemEdit'
           data-id='{{item._id}}'
-          title='{{localize "SWORDS_WIZARDRY.CharacterSheet.Combat.Table.Update" type='weapon'}}'
+          aria-label='{{localize "SWORDS_WIZARDRY.CharacterSheet.Combat.Table.Update" type='weapon'}}'
         >
-          <i class='fas fa-edit'></i>
-        </a>
-        <a
+          <i class='fas fa-edit' aria-hidden="true"></i>
+        </button>
+        <button
+          type="button"
           class='item-control item-delete'
           data-action='itemDelete'
           data-id='{{item._id}}'
-          title='{{localize "SWORDS_WIZARDRY.CharacterSheet.Combat.Table.Delete" type='weapon'}}'
+          aria-label='{{localize "SWORDS_WIZARDRY.CharacterSheet.Combat.Table.Delete" type='weapon'}}'
         >
-          <i class='fas fa-trash'></i>
-        </a>
+          <i class='fas fa-trash' aria-hidden="true"></i>
+        </button>
       </div>
     </li>
     {{/each}}
   </ol>
   <h3 class="align-center">{{localize 'SWORDS_WIZARDRY.CharacterSheet.Combat.ArmorTable.Title'}}</h3>
-  <ol class='items-list'>
-    <li class='item items-header grid grid-5col'>
+  <ol class='items-list columnar-items-list'>
+    <li class='item items-header grid grid-6col'>
       <div class='item-name grid-span-2'>{{localize 'SWORDS_WIZARDRY.CharacterSheet.Combat.ArmorTable.Name'}}</div>
       <div class='item-prop'>{{localize 'SWORDS_WIZARDRY.CharacterSheet.Combat.ArmorTable.Weight'}}</div>
       <div class='item-formula'>{{localize 'SWORDS_WIZARDRY.CharacterSheet.Combat.ArmorTable.EffectOnAC'}}</div>
+      <div class='item-prop'>{{localize 'SWORDS_WIZARDRY.CharacterSheet.Combat.ArmorTable.Equipped'}}</div>
       <div class='item-controls'>
-        <a
+        <button
+          type="button"
           class='item-control item-create'
           data-action='itemCreate'
           data-type='armor'
-          title="{{localize "SWORDS_WIZARDRY.CharacterSheet.Combat.ArmorTable.Create" type='armor'}}"
+          aria-label="{{localize "SWORDS_WIZARDRY.CharacterSheet.Combat.ArmorTable.Create" type='armor'}}"
         >
-          <i class='fas fa-plus'></i>
-        </a>
+          <i class='fas fa-plus' aria-hidden="true"></i>
+        </button>
       </div>
     </li>
     {{#each armor as |item id|}}
-      <li class='item grid grid-5col' data-item-id='{{item._id}}'>
+      <li class='item grid grid-6col' data-item-id='{{item._id}}'>
         <div class='item-name grid-span-2'>
           <div class='item-image'>
-            <a
+            <button
+              type="button"
               class='rollable'
               data-action='roll'
               data-id='{{item._id}}'
               data-roll-type='item'
+              aria-label="{{localize 'SWORDS_WIZARDRY.Chat.RollNamed' name=item.name}}"
             >
               <img
                 src='{{item.img}}'
-                title='{{item.name}}'
+                alt=""
                 width='24'
                 height='24'
               />
-            </a>
+            </button>
           </div>
           <span class='item-name-span'>{{item.name}}</span>
         </div>
         <div class='item-prop'>{{item.system.weight}}</div>
   
         <div class='item-formula item-prop'>{{item.system.effectOnAC}}</div>
+        <div class='item-prop'>
+          <input
+            type='checkbox'
+            data-action='armorEquipped'
+            data-id='{{item._id}}'
+            {{checked item.system.equipped}}
+            {{#unless ../editable}}disabled{{/unless}}
+            aria-label="{{localize 'SWORDS_WIZARDRY.CharacterSheet.Combat.ArmorTable.ToggleEquipped' name=item.name}}"
+          />
+        </div>
         <div class='item-controls'>
-          <a
+          <button
+            type="button"
             class='item-control item-edit'
             data-action='itemEdit'
             data-id='{{item._id}}'
-            title='{{localize "SWORDS_WIZARDRY.CharacterSheet.Combat.ArmorTable.Update" type='armor'}}'
+            aria-label='{{localize "SWORDS_WIZARDRY.CharacterSheet.Combat.ArmorTable.Update" type='armor'}}'
           >
-            <i class='fas fa-edit'></i>
-          </a>
-          <a
+            <i class='fas fa-edit' aria-hidden="true"></i>
+          </button>
+          <button
+            type="button"
             class='item-control item-delete'
             data-action='itemDelete'
             data-id='{{item._id}}'
-            title='{{localize "SWORDS_WIZARDRY.CharacterSheet.Combat.ArmorTable.Delete" type='armor'}}'
+            aria-label='{{localize "SWORDS_WIZARDRY.CharacterSheet.Combat.ArmorTable.Delete" type='armor'}}'
           >
-            <i class='fas fa-trash'></i>
-          </a>
+            <i class='fas fa-trash' aria-hidden="true"></i>
+          </button>
         </div>
       </li>
     {{/each}}

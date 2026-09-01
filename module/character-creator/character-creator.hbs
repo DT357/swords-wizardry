@@ -1,29 +1,23 @@
-<section>
-  <head>
-    <title>Character Creator</title>
-  </head>
-  <body>
-    <div class="dialog-content">
-      <div class="form-group">
-        <label for="name">Name</label>
-        <div class="form-fields">
-          <input name="name" type="text" />
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="folder">Folder</label>
-        <div class="form-fields">
-          <select name="folder">
-            <option value="">--</option>
-            {{#each folders as |folder|}}
-            <option value="{{folder.id}}">{{folder.name}}</option>
-            {{/each}}
-          </select>
-        </div>
-      </div>
+<section class="character-creator-form">
+  {{#if error}}<p class="form-error" role="alert">{{error}}</p>{{/if}}
+  <div class="form-group">
+    <label for="swords-wizardry-character-name">{{localize "SWORDS_WIZARDRY.CharacterCreator.Name"}}</label>
+    <div class="form-fields">
+      <input id="swords-wizardry-character-name" name="name" type="text" value="{{nameDraft}}" maxlength="100" required autofocus>
     </div>
-    <div class="dialog-buttons">
-      <button class="dialog-button ok default bright" data-button="ok" type="submit">Create Character</button>
+  </div>
+  <div class="form-group">
+    <label for="swords-wizardry-character-folder">{{localize "SWORDS_WIZARDRY.CharacterCreator.Folder"}}</label>
+    <div class="form-fields">
+      <select id="swords-wizardry-character-folder" name="folder">
+        <option value="">{{localize "SWORDS_WIZARDRY.CharacterCreator.NoFolder"}}</option>
+        {{#each folders as |folder|}}
+          <option value="{{folder.id}}" {{#if (eq folder.id ../folderDraft)}}selected{{/if}}>{{folder.name}}</option>
+        {{/each}}
+      </select>
     </div>
-  </body>
+  </div>
+  <button type="submit" {{#if pending}}disabled{{/if}}>
+    {{localize "SWORDS_WIZARDRY.CharacterCreator.Submit"}}
+  </button>
 </section>

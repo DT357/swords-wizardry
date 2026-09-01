@@ -1,5 +1,10 @@
-import { SaveRoll } from '../rolls/rolls.mjs';
-import { MoraleRoll } from '../rolls/rolls.mjs';
+import { synchronizeDerivedFields } from './derived-fields.mjs';
+import {
+  calculateArmorClass,
+  getEquippedArmorBonus,
+  normalizeArmorClassSheetUpdate
+} from './armor-class.mjs';
+import { notifyOperationFailure } from '../helpers/notifications.mjs';
 
 export class SwordsWizardryActor extends Actor {
 
@@ -38,7 +43,15 @@ export class SwordsWizardryActor extends Actor {
     }
 
     this._prepareCharacterData(actorData);
+    this._prepareArmorClass(actorData);
     this._prepareMemorizedSpells(actorData);
+  }
+
+  _prepareArmorClass(actorData) {
+    if (actorData.type !== 'character' && actorData.type !== 'npc') return;
+    const armorClass = calculateArmorClass(actorData.system, actorData.items);
+    actorData.system.ac.value = armorClass.ac;
+    actorData.system.aac.value = armorClass.aac;
   }
 
   _prepareToHitMatrix() {
@@ -79,20 +92,15 @@ export class SwordsWizardryActor extends Actor {
     const systemData = actorData.system;
 
     let totalWeight = 0;
-    let zeroWeightCount = 0;
-
     for (const item of actorData.items) {
       const itype = item.type;
       if (itype !== 'item' && itype !== 'weapon' && itype !== 'armor') continue;
 
-      const w = Number(item.system.weight) || 0;
-      const q = Number(item.system.quantity) || 1;
-
-      if (w === 0) {
-        zeroWeightCount += q;
-      } else {
-        totalWeight += w * q;
-      }
+      const weight = Number(item.system.weight ?? 0);
+      const quantity = Number(item.system.quantity ?? 1);
+      const safeWeight = Number.isFinite(weight) && weight >= 0 ? weight : 0;
+      const safeQuantity = Number.isFinite(quantity) && quantity >= 0 ? quantity : 0;
+      totalWeight += safeWeight * safeQuantity;
     }
 
     // TODO If misc equipment is checked on character sheet add 10 lbs
@@ -168,32 +176,35 @@ export class SwordsWizardryActor extends Actor {
   }
 
   async rollSave() {
-    const roll = new SaveRoll('d20', this);
-    roll.render();
+    return notifyOperationFailure(
+      await game.swordswizardry.rolls.save(this),
+      ['SWORDS_WIZARDRY.Roll.Error']
+    );
+  }
+
+  async rollAbility(abilityKey) {
+    return notifyOperationFailure(
+      await game.swordswizardry.rolls.ability(this, abilityKey),
+      ['SWORDS_WIZARDRY.Roll.Error']
+    );
   }
   
  async rollMorale() {
     if (this.type !== 'npc') return;
-    const roll = new MoraleRoll('2d6', this);
-    roll.render();
+    return notifyOperationFailure(
+      await game.swordswizardry.rolls.morale(this),
+      ['SWORDS_WIZARDRY.Roll.Error']
+    );
   }
 
   _preUpdate(changed, options, user) {
-    // Two-way data binding for AC and AAC
     if (changed.system) {
-      if (changed.system.tHAACB && changed.system.tHAACB !== this.system.tHAACB) {
-        changed.system.tHAC0 = 19 - changed.system.tHAACB;
-      } else if (changed.system.tHAC0 && changed.system.tHAC0 !== this.system.tHAC0) {
-        changed.system.tHAACB = 19 - changed.system.tHAC0;
-      }
-
-      if (changed.system.ac && changed.system.ac.value !== this.system.ac.value) {
-        if (!changed.system.aac) changed.system.aac = {};
-        changed.system.aac.value = 19 - changed.system.ac.value;
-      } else if (changed.system.aac && changed.system.aac.value !== this.system.aac.value) {
-        if (!changed.system.ac) changed.system.ac = {};
-        changed.system.ac.value = 19 - changed.system.aac.value;
-      }
+      normalizeArmorClassSheetUpdate(
+        changed.system,
+        getEquippedArmorBonus(this.items),
+        options
+      );
+      synchronizeDerivedFields(this.system, changed.system, options);
     }
     return super._preUpdate(changed, options, user);
   }

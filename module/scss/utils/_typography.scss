@@ -1,29 +1,29 @@
 @font-face {
     font-family: 'Libre Baskerville';
-    src: url('/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Regular.ttf');
+    src: url('../assets/fonts/LibreBaskerville/LibreBaskerville-Regular.ttf');
 }
 
 @font-face {
     font-family: 'Libre Baskerville';
     font-weight: bold;
-    src: url('/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf');
+    src: url('../assets/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf');
 }
 
 @font-face {
     font-family: 'Libre Baskerville';
     font-style: italic;
-    src: url('/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Italic.ttf');
+    src: url('../assets/fonts/LibreBaskerville/LibreBaskerville-Italic.ttf');
 }
 
 @font-face {
     font-family: 'Inter';
-    src: url('/systems/swords-wizardry/assets/fonts/Inter/Inter_24pt-Regular.ttf');
+    src: url('../assets/fonts/Inter/Inter_24pt-Regular.ttf');
 }
 
 @font-face {
     font-family: 'Inter';
     font-weight: 800;
-    src: url('/systems/swords-wizardry/assets/fonts/Inter/Inter_24pt-ExtraBold.ttf');
+    src: url('../assets/fonts/Inter/Inter_24pt-ExtraBold.ttf');
 }
 
 $font-primary: 'Libre Baskerville';

@@ -22,7 +22,11 @@ const stageRoot = resolve(outputRoot, manifest.id);
 const archivePath = resolve(outputRoot, `${manifest.id}.zip`);
 const manifestPath = resolve(outputRoot, 'system.json');
 const checksumPath = resolve(outputRoot, 'SHA256SUMS.txt');
+const fileManifestPath = resolve(outputRoot, 'FILES.txt');
 const fixedArchiveDate = new Date('1980-01-01T00:00:00.000Z');
+const warningFileCount = 5_000;
+const warningTotalBytes = 250 * 1024 * 1024;
+const maximumSingleFileBytes = 25 * 1024 * 1024;
 
 assertSafeOutputPath(outputRoot);
 rmSync(outputRoot, { recursive: true, force: true });
@@ -30,6 +34,17 @@ mkdirSync(stageRoot, { recursive: true });
 
 const releaseFiles = collectReleaseFiles(allowlist);
 validateReleaseFiles(releaseFiles);
+const releaseStats = releaseFiles.map((file) => ({
+  file,
+  bytes: statSync(join(root, file)).size
+}));
+const totalBytes = releaseStats.reduce((sum, entry) => sum + entry.bytes, 0);
+if (releaseFiles.length > warningFileCount) {
+  console.warn(`Warning: release contains ${releaseFiles.length} files.`);
+}
+if (totalBytes > warningTotalBytes) {
+  console.warn(`Warning: unpacked release is ${formatBytes(totalBytes)}.`);
+}
 for (const file of releaseFiles) {
   const destination = join(stageRoot, file);
   mkdirSync(dirname(destination), { recursive: true });
@@ -37,8 +52,12 @@ for (const file of releaseFiles) {
 }
 copyFileSync(join(root, 'system.json'), manifestPath);
 
+writeFileSync(fileManifestPath, `${releaseStats.map(({ file, bytes }) => (
+  `${sha256(join(root, file))}  ${String(bytes).padStart(10, ' ')}  ${file}`
+)).join('\n')}\n`, 'utf8');
+
 await writeArchive(releaseFiles);
-const checksumLines = [archivePath, manifestPath].map((file) => (
+const checksumLines = [archivePath, manifestPath, fileManifestPath].map((file) => (
   `${sha256(file)}  ${relative(outputRoot, file).split(sep).join('/')}`
 ));
 writeFileSync(checksumPath, `${checksumLines.join('\n')}\n`, 'utf8');
@@ -93,15 +112,23 @@ function validateReleaseFiles(files) {
   }
 
   const forbiddenSegments = new Set([
-    '.git', 'dist', 'node_modules', 'scripts', 'tests', 'scss'
+    '.git', 'dist', 'evidence', 'node_modules', 'RuntimeTests', 'scripts', 'tests', 'scss'
   ]);
   for (const file of files) {
     const segments = file.split('/');
     if (segments.some((segment) => forbiddenSegments.has(segment))) {
       throw new Error(`Forbidden release path: ${file}`);
     }
-    if (file.endsWith('.map') || file.endsWith('~')) {
+    if (
+      file.endsWith('.map')
+      || file.endsWith('~')
+      || /(?:^|\/)(?:\.env(?:\..*)?|credentials?|license\.json|options\.json)$/iu.test(file)
+    ) {
       throw new Error(`Forbidden generated or backup file: ${file}`);
+    }
+    const bytes = statSync(join(root, file)).size;
+    if (bytes > maximumSingleFileBytes) {
+      throw new Error(`Unexpected large release file (${formatBytes(bytes)}): ${file}`);
     }
   }
 }
@@ -158,4 +185,8 @@ function normalizePath(path) {
 
 function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex');
+}
+
+function formatBytes(bytes) {
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MiB`;
 }

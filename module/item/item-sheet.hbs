@@ -1,12 +1,10 @@
 <section class="{{cssClass}}" autocomplete="off">
   <header class="sheet-header">
-    <img
-      class="profile-img"
-      src="{{item.img}}"
+    <button type="button" class="profile-image-button" aria-label="{{localize 'SWORDS_WIZARDRY.Actions.EditImage' name=item.name}}"
       data-action="editImage"
-      data-field="img"
-      title="{{item.name}}"
-    />
+      data-field="img">
+      <img class="profile-img" src="{{item.img}}" alt="" />
+    </button>
     <div class="header-fields">
       <h2 class="charname">
         <input name="name" type="text" value="{{item.name}}" placeholder={{localize "SWORDS_WIZARDRY.Item.Item.Name"}}/>
@@ -31,10 +29,14 @@
   </header>
   <section class="sheet-body">
     {{#if (eq item.type 'armor')}}
-    <div class="grid grid-1col">
+    <div class="grid grid-2col">
       <div class="resource">
         <label class="resource-label">{{localize "SWORDS_WIZARDRY.Item.Armor.Attributes.EffectOnAC"}}</label>
         <input type="text" name="system.effectOnAC" value="{{system.effectOnAC}}" data-dtype="String"/>
+      </div>
+      <div class="resource">
+        <label class="resource-label" for="{{rootId}}-armor-equipped">{{localize "SWORDS_WIZARDRY.Item.Armor.Attributes.Equipped"}}</label>
+        <input id="{{rootId}}-armor-equipped" type="checkbox" name="system.equipped" {{checked system.equipped}} {{#unless editable}}disabled{{/unless}}/>
       </div>
     </div>
     {{/if}}

@@ -3,10 +3,6 @@ import { ImportManager } from './importer/importer.mjs';
 import {
   CharacterCreatorManager
 } from './character-creator/character-creator.mjs';
-import { SwordsWizardryChatMessage } from './helpers/overrides.mjs';
-import {
-  AttackRoll, DamageRoll, FeatureRoll, SaveRoll, MoraleRoll
-} from './rolls/rolls.mjs';
 import {
   CharacterData, ContainerData, NPCData
 } from './actor/actor-model.mjs';
@@ -23,25 +19,61 @@ import {
 } from './combat/combat.mjs';
 import { CombatHud } from './hud/hud.mjs';
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
-import { handleRPC } from './helpers/rpc.mjs';
 import { SWORDS_WIZARDRY } from './helpers/config.mjs';
 import { createFoundrySpellService } from './spells/service.mjs';
-import { createFoundrySpellApplicationService } from './spells/application.mjs';
 import { createFoundrySpellChatController } from './spells/chat-controller.mjs';
+import { createFoundrySystemSocket } from './authority/system-socket.mjs';
+import {
+  createFoundryHitPointApplicationService
+} from './hit-points/application-service.mjs';
+import { readHitPointCapability } from './hit-points/result-adapters.mjs';
+import { createFoundryWeaponService } from './weapons/service.mjs';
+import { createFoundryWeaponChatController } from './weapons/chat-controller.mjs';
+import { createFoundryRollService } from './rolls/service.mjs';
+import { findNegativeTangibleValues } from './actor/data-diagnostics.mjs';
+import { debug } from './helpers/logger.mjs';
 
 const { Actors, Items } = foundry.documents.collections;
 const { ActorSheet, ItemSheet } = foundry.appv1.sheets;
 let spellChatController;
+let weaponChatController;
+let systemSocket;
 
 Hooks.once('init', function() {
   registerSystemSettings();
 
-  const spellService = createFoundrySpellService();
-  const spellApplicationService = createFoundrySpellApplicationService();
-  spellChatController = createFoundrySpellChatController(
+  const operations = {};
+  systemSocket = createFoundrySystemSocket(operations);
+  const hitPointService = createFoundryHitPointApplicationService((message) => (
+    readHitPointCapability(message, {
+      getUserById: (id) => game.users.get(id)
+    })
+  ));
+  const spellService = createFoundrySpellService({
+    authority: systemSocket,
+    hitPointService
+  });
+  const weaponService = createFoundryWeaponService({
+    authority: systemSocket,
+    hitPointService
+  });
+  const rollService = createFoundryRollService({ authority: systemSocket });
+  Object.assign(operations, {
+    'weapon.attack': weaponService.handleAttack.bind(weaponService),
+    'weapon.damage': weaponService.handleDamage.bind(weaponService),
+    'spell.hitPointResult': spellService.handleHitPointResult.bind(spellService),
+    'spell.consume': spellService.handleConsume.bind(spellService),
+    'hitPoints.apply': hitPointService.handleApply.bind(hitPointService),
+    'morale.roll': rollService.handleMorale.bind(rollService)
+  });
+  spellChatController = createFoundrySpellChatController({
     spellService,
-    spellApplicationService
-  );
+    authority: systemSocket
+  });
+  weaponChatController = createFoundryWeaponChatController({
+    weaponService,
+    authority: systemSocket
+  });
 
   game.swordswizardry = {
     SwordsWizardryActor,
@@ -50,8 +82,22 @@ Hooks.once('init', function() {
     spells: Object.freeze({
       post: spellService.post.bind(spellService),
       cast: spellService.cast.bind(spellService),
-      invoke: spellService.invoke.bind(spellService),
-      requestApplication: spellApplicationService.apply.bind(spellApplicationService)
+      invoke: spellService.invoke.bind(spellService)
+    }),
+    weapons: Object.freeze({
+      attack: weaponService.attack.bind(weaponService),
+      damage: weaponService.damage.bind(weaponService)
+    }),
+    rolls: Object.freeze({
+      ability: rollService.ability.bind(rollService),
+      save: rollService.save.bind(rollService),
+      feature: rollService.feature.bind(rollService),
+      morale: rollService.morale.bind(rollService)
+    }),
+    diagnostics: Object.freeze({
+      findNegativeItemValues: () => game.user?.isGM
+        ? findNegativeTangibleValues(game.actors)
+        : []
     })
   };
 
@@ -73,19 +119,9 @@ Hooks.once('init', function() {
   CONFIG.Item.dataModels.weapon = WeaponData;
   CONFIG.Item.documentClass = SwordsWizardryItem;
   CONFIG.Combat.documentClass = SwordsWizardryCombat;
-  CONFIG.ChatMessage.documentClass = SwordsWizardryChatMessage;
   CONFIG.Token.documentClass = SwordsWizardryTokenDocument;
 
   CONFIG.ui.combat = SwordsWizardryCombatTracker;
-
-  CONFIG.Dice.rolls = [
-    Roll,
-    AttackRoll,
-    DamageRoll,
-    FeatureRoll,
-    SaveRoll,
-    MoraleRoll
-  ];
 
   // Active Effects are never copied to the Actor,
   // but will still apply to the Actor from within the Item
@@ -105,7 +141,7 @@ Hooks.once('init', function() {
   });
 
   Hooks.on('renderActorDirectory', (app, html, _data, _options) => {
-    console.log('renderActorDirectory', app, html);
+    debug('Adding Actor directory actions.');
     ImportManager.addImportActorButton(app, html);
     CharacterCreatorManager.addCharacterCreationButton(app, html);
   });
@@ -130,7 +166,7 @@ Handlebars.registerHelper({
 
 // TODO Move this to a template, lazy
 function showWelcome() {
-  SwordsWizardryChatMessage.create({
+  ChatMessage.create({
     content: `<h3><strong>Welcome to Swords & Wizardry!</strong></h3>
 <p><em>Swords & Wizardry, S&W, and Mythmere Games are trademarks of <a href="mythmeregames.com">Mythmere Games LLC</a>. The author is not affiliated in any way with Mythmere Games LLC.</em></p>
 <p>This system can be used to play Swords & Wizardry and pretty much any variant of Swords & Wizardry or the original edition of the first published RPG. To support this flexibility, it is relatively light on automations. Feedback and Pull Requests are always welcome; see our <a href="https://github.com/vonkow/swords-wizardry">project page</a> to submit either.</p>
@@ -144,7 +180,11 @@ function showWelcome() {
 }
 
 Hooks.once('ready', async () => {
+  systemSocket.start();
   spellChatController.start();
+  weaponChatController.start();
+  CombatHud.start();
+  await CombatHud.reconcile();
   if (game.user.isGM) {
     if (game.settings.get('swords-wizardry', 'systemVersion') !== game.system.version) {
       game.settings.set('swords-wizardry', 'systemVersion', game.system.version);
@@ -156,22 +196,16 @@ Hooks.once('ready', async () => {
       game.settings.set('swords-wizardry', 'showWelcome', false);
     }
   }
-  game.socket.on('system.swords-wizardry',(packet) => {
-    if (packet.type === 'rpc') handleRPC(packet);
-    else console.log('system.swords-wizardry', 'socket event', packet);
-  });
   Hooks.on('hotbarDrop', (_bar, data, slot) => createItemMacro(data, slot));
-});
-
-Hooks.on('controlToken', async (token, selected) => {
-  CombatHud.activateHud(token, selected);
 });
 
 // TODO Move to helpers (if needed at all)
 async function createItemMacro(data, slot) {
   if (data.type !== 'Item') return;
   if (!data.uuid.includes('Actor.') && !data.uuid.includes('Token.')) {
-    return ui.notifications.warn('You can only create macro buttons for owned Items');
+    return ui.notifications.warn(
+      game.i18n.localize('SWORDS_WIZARDRY.Macro.OwnedItemsOnly')
+    );
   }
   const item = await Item.fromDropData(data);
   const command = `game.swordswizardry.rollItemMacro("${data.uuid}");`;
@@ -200,7 +234,7 @@ function rollItemMacro(itemUuid) {
     if (!item || !item.parent) {
       const itemName = item?.name ?? itemUuid;
       return ui.notifications.warn(
-        `Could not find item ${itemName}. You may need to delete and recreate this macro.`
+        game.i18n.format('SWORDS_WIZARDRY.Macro.MissingItem', { item: itemName })
       );
     }
     item.roll();

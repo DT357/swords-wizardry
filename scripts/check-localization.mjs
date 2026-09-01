@@ -28,7 +28,8 @@ for (const directory of ['module', 'templates']) {
     if (!['.mjs', '.hbs'].includes(extname(file))) continue;
     const source = readFileSync(file, 'utf8');
     for (const match of source.matchAll(staticKeyPattern)) {
-      if (!canonical.has(match[1])) {
+      const isNamespace = [...canonical].some((key) => key.startsWith(`${match[1]}.`));
+      if (!canonical.has(match[1]) && !isNamespace) {
         failures.push(`${relative(root, file)} references missing key ${match[1]}`);
       }
     }

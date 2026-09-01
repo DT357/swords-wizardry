@@ -7,6 +7,8 @@ const configuration = {
   baseUrl: requireEnvironment('SW_FOUNDRY_URL'),
   worldId: requireEnvironment('SW_FOUNDRY_WORLD_ID'),
   playerName: requireEnvironment('SW_FOUNDRY_PLAYER_NAME'),
+  creatorName: process.env.SW_FOUNDRY_CREATOR_NAME ?? 'Test Creator',
+  secondGmName: process.env.SW_FOUNDRY_SECOND_GM_NAME ?? 'Test GM 2',
   gmName: process.env.SW_FOUNDRY_GM_NAME ?? 'Gamemaster',
   gmPassword: process.env.SW_FOUNDRY_GM_PASSWORD ?? ''
 };
@@ -20,18 +22,25 @@ const page = await browser.newPage();
 
 try {
   await joinWorld(page, configuration);
-  const provisioned = await page.evaluate(async ({ diagnosticId, playerName }) => {
-    let player = game.users.getName(playerName);
-    if (!player) {
-      const UserClass = CONFIG.User.documentClass;
-      player = await UserClass.create({
-        name: playerName,
-        role: CONST.USER_ROLES.PLAYER,
-        password: ''
-      });
+  const provisioned = await page.evaluate(async ({
+    diagnosticId, playerName, creatorName, secondGmName
+  }) => {
+    async function ensureUser(name, role) {
+      let user = game.users.getName(name);
+      if (!user) {
+        const UserClass = CONFIG.User.documentClass;
+        user = await UserClass.create({ name, role, password: '' });
+      } else if (user.role !== role) {
+        await user.update({ role });
+      }
+      return user;
     }
-    if (player.isGM) throw new Error(`Fixture user ${playerName} must not be a GM.`);
-
+    const player = await ensureUser(playerName, CONST.USER_ROLES.PLAYER);
+    const creator = await ensureUser(creatorName, CONST.USER_ROLES.TRUSTED);
+    const secondGm = await ensureUser(secondGmName, CONST.USER_ROLES.GAMEMASTER);
+    if (player.isGM || creator.isGM || !secondGm.isGM) {
+      throw new Error('Disposable test user roles are invalid.');
+    }
     const module = game.modules.get(diagnosticId);
     if (!module) throw new Error(`Diagnostic module ${diagnosticId} is not installed.`);
 
@@ -48,11 +57,20 @@ try {
       diagnosticWasActive: module.active,
       playerId: player.id,
       playerRole: player.role,
+      creatorId: creator.id,
+      creatorRole: creator.role,
+      secondGmId: secondGm.id,
+      secondGmRole: secondGm.role,
       systemId: game.system.id,
       systemVersion: game.system.version,
       worldId: game.world.id
     };
-  }, { diagnosticId: DIAGNOSTIC_ID, playerName: configuration.playerName });
+  }, {
+    diagnosticId: DIAGNOSTIC_ID,
+    playerName: configuration.playerName,
+    creatorName: configuration.creatorName,
+    secondGmName: configuration.secondGmName
+  });
 
   assertRuntimeIdentity(provisioned, configuration);
 

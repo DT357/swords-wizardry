@@ -1,8 +1,20 @@
-{{ log 'feature-roll-sheet' this}}
-<h3>{{localize "SWORDS_WIZARDRY.Chat.Rolled"}}: {{item.name}}</h3>
-<a class="inline-result"><span>{{{roll}}}</span></a>
-<div/>
-{{localize "SWORDS_WIZARDRY.Chat.Target"}} {{#if (eq targetType 'ascending')}}>={{else}}<={{/if}} {{target}}
-<br/>
-{{# if success}}{{localize "SWORDS_WIZARDRY.Chat.Success"}}{{else}}{{localize "SWORDS_WIZARDRY.Chat.Failure"}}{{/if}}
-<hr/>
+<article class="swords-wizardry threshold-roll-card feature-card">
+  <header class="item-card__header feature-card__header">
+    <img src="{{item.img}}" alt="" width="36" height="36">
+    <h3 class="chat-card__title">{{item.name}}</h3>
+  </header>
+  <div class="feature-card__description">{{{description}}}</div>
+  {{#if roll}}
+    <a class="inline-result"><span>{{{roll}}}</span></a>
+    <div class="threshold-roll-card__result">
+      <span class="threshold-roll-card__target">
+        {{localize "SWORDS_WIZARDRY.Chat.Target"}}
+        {{#if (eq targetType "ascending")}}&ge;{{else}}&le;{{/if}}
+        {{target}}
+      </span>
+      <strong class="threshold-roll-card__outcome {{#if success}}is-success{{else}}is-failure{{/if}}" role="status">
+        {{#if success}}{{localize "SWORDS_WIZARDRY.Chat.Success"}}{{else}}{{localize "SWORDS_WIZARDRY.Chat.Failure"}}{{/if}}
+      </strong>
+    </div>
+  {{/if}}
+</article>

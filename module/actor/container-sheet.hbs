@@ -1,15 +1,11 @@
 {{#if (eq actor.type 'container')}}
 <section class="{{cssClass}} {{actor.type}} flexcol" autocomplete="off">
   <header class="sheet-header">
-    <img
-      class="profile-img"
-      src="{{actor.img}}"
+    <button type="button" class="profile-image-button" aria-label="{{localize 'SWORDS_WIZARDRY.Actions.EditImage' name=actor.name}}"
       data-action="editImage"
-      data-field="img"
-      title="{{actor.name}}"
-      height="100"
-      width="100"
-    />
+      data-field="img">
+      <img class="profile-img" src="{{actor.img}}" alt="" height="100" width="100" />
+    </button>
     <div class="header-fields">
       <h2 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder={{localize 'SWORDS_WIZARDRY.NPCSheet.Main.Name'}}></h2>
     </div>

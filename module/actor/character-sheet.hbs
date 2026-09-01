@@ -1,14 +1,11 @@
 {{#if (eq actor.type 'character') }}
 <section class="{{cssClass}} {{actor.type}} flexcol" autocomplete="off">
   <header class="sheet-header">
-    <img
-      class="profile-img"
-      src="{{actor.img}}"
+    <button type="button" class="profile-image-button" aria-label="{{localize 'SWORDS_WIZARDRY.Actions.EditImage' name=actor.name}}"
       data-action="editImage"
-      data-field="img"
-      title="{{actor.name}}"
-      height="96"
-      width="96" />
+      data-field="img">
+      <img class="profile-img" src="{{actor.img}}" alt="" height="96" width="96" />
+    </button>
     <div class="header-fields">
       <h2 class="charname">
         <input
@@ -76,20 +73,18 @@
         </div>
       </div>
       <div class="resource flex-group-center ">
-        <label for="system.save.value" class="resource-label">
-          {{ localize 'SWORDS_WIZARDRY.Stats.SavingThrow.abbr' }}
-          <a data-action="saveRoll" class='save-roll'>
-            <i class="fas fa-dice-d20"></i>
-          </a>
-        </label>
+        <button type="button" class="resource-label stat-roll-control save-roll" data-action="saveRoll" aria-label="{{localize 'SWORDS_WIZARDRY.Hud.RollSave'}}">
+          <span>{{ localize 'SWORDS_WIZARDRY.Stats.SavingThrow.abbr' }}</span>
+          <i class="fas fa-dice-d20" aria-hidden="true"></i>
+        </button>
         <div class="resource-content flexrow flex-center flex-between">
-          <input type="text" name="system.save.value" value="{{system.save.value}}" data-dtype="Number"/>
+          <input type="text" name="system.save.value" value="{{system.save.value}}" data-dtype="Number" aria-label="{{localize 'SWORDS_WIZARDRY.Stats.SavingThrow.abbr'}}"/>
         </div>
       </div>
       <div class="resource flex-group-center">
         {{# if useAscendingAC }}
         <label for="system.aac.value" class="resource-label">
-          {{ localize 'SWORDS_WIZARDRY.Stats.ArmorClass.abbr' }} (Asc)
+          {{ localize 'SWORDS_WIZARDRY.Stats.ArmorClass.abbr' }} ({{localize 'SWORDS_WIZARDRY.Stats.ArmorClass.ascending'}})
         </label>
         <div class="resource-content flexrow flex-center flex-between">
           <input type="text" name="system.aac.value" value="{{system.aac.value}}" data-dtype="Number"/>

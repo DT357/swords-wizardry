@@ -2,10 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { buildSpellMessageSnapshot } from '../../../module/spells/domain.mjs';
-import {
-  applyFoundryChatVisibility,
-  SpellService
-} from '../../../module/spells/service.mjs';
+import { SpellService } from '../../../module/spells/service.mjs';
+import { applyFoundryChatVisibility } from '../../../module/rolls/chat-visibility.mjs';
 
 function createFixture(overrides = {}) {
   const actor = {

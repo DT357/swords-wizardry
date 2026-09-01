@@ -1,11 +1,16 @@
-<section>
-  <head>
-    <title>Import NPC Stat block</title>
-    <div>Expected Format:</div>
-    <p>Giant Worker Ant: HD 2; AC 3[16]; Atk bite (1d6); Move 18; Save 16; Morale 10; AL N; CL/XP 2/30; Special: none.</p>
-  </head>
-  <body>
-    <textarea style="height:80%;width:100%" id="importext" name="importext" placeholder="Enter your text here..."></textarea>
-    <button type="submit">Submit</button>
-  </body>
+<section class="importer-form">
+  <p>{{localize "SWORDS_WIZARDRY.Importer.ExpectedFormat"}}</p>
+  <p><code>{{localize "SWORDS_WIZARDRY.Importer.Example"}}</code></p>
+  {{#if errors.length}}
+    <ul class="form-errors" role="alert">
+      {{#each errors as |error|}}
+        <li>{{error.message}}</li>
+      {{/each}}
+    </ul>
+  {{/if}}
+  <label for="swords-wizardry-import-text">{{localize "SWORDS_WIZARDRY.Importer.StatBlock"}}</label>
+  <textarea id="swords-wizardry-import-text" name="importText" maxlength="20000" required>{{importText}}</textarea>
+  <button type="submit" {{#if pending}}disabled{{/if}}>
+    {{localize "SWORDS_WIZARDRY.Importer.Submit"}}
+  </button>
 </section>

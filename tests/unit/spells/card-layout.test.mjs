@@ -42,6 +42,18 @@ test('non-damage spell results retain the spell result layout', () => {
   assert.match(html, /class="spell-result__application-controls"/);
 });
 
+test('spell attack targets show a bold name followed by localized Hit! or Miss!', () => {
+  for (const [attackOutcome, attackOutcomeLabel] of [['hit', 'Hit'], ['miss', 'Miss']]) {
+    const context = resultContext('attack');
+    Object.assign(context.spell.targets[0], { attackOutcome, attackOutcomeLabel });
+    const html = render(context);
+    assert.match(
+      html,
+      new RegExp(`<strong class="spell-result__target-name">Target<\\/strong>:\\s*<span class="spell-result__target-status spell-result__attack-outcome">${attackOutcomeLabel}!<\\/span>`)
+    );
+  }
+});
+
 test('spell-card typography inherits the chat theme without core text shadows', () => {
   assert.match(
     systemStylesSource,

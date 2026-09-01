@@ -1,8 +1,8 @@
 {
   "id": "swords-wizardry-spell-diagnostics",
-  "title": "Swords & Wizardry Spell Diagnostics",
-  "description": "Test-only runtime diagnostics for the Swords & Wizardry spell-card workflow.",
-  "version": "1.0.0",
+  "title": "Swords & Wizardry Fix Diagnostics",
+  "description": "Test-only runtime diagnostics for Swords & Wizardry authority, document, roll, and lifecycle workflows.",
+  "version": "2.0.0",
   "compatibility": {
     "minimum": 13
   },

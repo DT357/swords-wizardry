@@ -1,148 +1,244 @@
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+const SYSTEM_ID = 'swords-wizardry';
+const HUD_LEFT = 15;
+const HUD_MIN_WIDTH = 200;
+const HUD_MAX_WIDTH = 350;
+const HUDS = new Map();
+const MANAGER_HOOKS = new Map();
+let reconcileRequested = false;
+let reconcileTask = null;
+const MANAGER_EVENTS = Object.freeze([
+  'controlToken',
+  'deleteToken',
+  'canvasTearDown',
+  'canvasReady',
+  'updateActor',
+  'createItem',
+  'updateItem',
+  'deleteItem'
+]);
 
 export class CombatHud extends HandlebarsApplicationMixin(ApplicationV2) {
-  RERENDER_EVENTS = [
-    'createItem',
-    'updateItem',
-    'deleteItem',
-    'updateActor'
-  ];
+  #closed = false;
+  #renderScheduled = false;
+  #renderGeneration = 0;
 
   constructor(token, options = {}) {
     super(options);
-    this.token = token;
-    this.actor = token.actor;
-    if (game.user.combatHuds == null) game.user.combatHuds = [];
-    game.user.combatHuds.push(this);
-    this.registeredHooks = {};
-    this._registerHooks();
+    this.token = token?.document ?? token;
+    this.actor = token?.actor ?? this.token?.actor ?? null;
   }
 
   static DEFAULT_OPTIONS = {
-    position: {
-      left: 15,
-      width: 200
+    position: { left: HUD_LEFT, width: HUD_MIN_WIDTH },
+    actions: {
+      save: onSave,
+      item: onItem,
+      cast: onCast
     },
     window: {
-      icon: 'fa fa-gear', // TODO CHANGEME
-      title: 'Combat HUD',
+      icon: 'fa-solid fa-gear',
       contentClasses: ['swords-wizardry', 'swords-wizardry-combat-hud']
+    }
+  };
+
+  static PARTS = {
+    main: { template: `systems/${SYSTEM_ID}/module/hud/hud.hbs` }
+  };
+
+  static get instances() {
+    return HUDS;
+  }
+
+  static start() {
+    if (MANAGER_HOOKS.size) return;
+    for (const event of MANAGER_EVENTS) {
+      const callback = managerCallback(event);
+      MANAGER_HOOKS.set(event, Hooks.on(event, callback));
     }
   }
 
-  static PARTS = {
-    main: {
-      template: 'systems/swords-wizardry/module/hud/hud.hbs'
+  static async stop() {
+    for (const [event, id] of MANAGER_HOOKS) Hooks.off(event, id);
+    MANAGER_HOOKS.clear();
+    await this.closeAll();
+  }
+
+  static reconcile() {
+    reconcileRequested = true;
+    if (!reconcileTask) {
+      reconcileTask = runReconcileQueue()
+        .finally(() => { reconcileTask = null; });
     }
+    return reconcileTask;
+  }
+
+  static async closeAll() {
+    reconcileRequested = false;
+    if (reconcileTask) await reconcileTask;
+    await Promise.all([...HUDS.values()].map((hud) => hud.close()));
   }
 
   get id() {
-    return `swords-wizardry-combat-hud-${this.token.id}`;
+    return `swords-wizardry-combat-hud-${String(this.token?.uuid ?? this.token?.id ?? '')
+      .replace(/[^A-Za-z0-9_-]/g, '-')}`;
   }
 
   get title() {
-    return 'Combat HUD';
-  }
-
-  get title() {
-    //TODO do AC and HP
-    return `${this.actor.name}`;
+    return game.i18n.format('SWORDS_WIZARDRY.Hud.Title', {
+      name: this.actor?.name ?? ''
+    });
   }
 
   _prepareContext() {
     return {
       token: this.token,
       actor: this.actor,
-      useAscendingAC: game.settings.get('swords-wizardry', 'useAscendingAC')
-    }
+      useAscendingAC: game.settings.get(SYSTEM_ID, 'useAscendingAC')
+    };
   }
 
   _onRender(context, options) {
-    // TODO de-jQuery-ify
-    const $html = $(this.element);
-
-    $html.on('click', '.save-roll', (ev) => {
-      const item = this.actor.rollSave();
+    if (typeof super._onRender === 'function') super._onRender(context, options);
+    const rect = this.element?.getBoundingClientRect?.();
+    if (!rect) return;
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const firstRender = options?.isFirstRender === true;
+    const availableWidth = Math.max(0, viewportWidth - (HUD_LEFT * 2));
+    const maximumWidth = Math.min(HUD_MAX_WIDTH, availableWidth);
+    const minimumWidth = Math.min(HUD_MIN_WIDTH, maximumWidth);
+    const width = clamp(
+      measureHudFrameWidth(this.element, rect),
+      minimumWidth,
+      maximumWidth
+    );
+    const maximumLeft = Math.max(0, viewportWidth - width);
+    this.setPosition({
+      left: firstRender
+        ? clamp(HUD_LEFT, 0, maximumLeft)
+        : clamp(rect.left, 0, maximumLeft),
+      top: firstRender
+        ? Math.max(0, (viewportHeight - rect.height) / 2)
+        : clamp(rect.top, 0, Math.max(0, viewportHeight - rect.height)),
+      width
     });
-
-    $html.on('click', '.item', (ev) => {
-      const li = $(ev.currentTarget);
-      const item = this.actor.items.get(li.data('itemId'));
-      if (!item) return;
-      item.roll();
-    });
-
-    $html.on('click', '.item-feature', (ev) => {
-      const li = $(ev.currentTarget);
-      const itemId = li.data('itemId');
-      const item = this.actor.items.get(itemId);
-      if (!item) return;
-      item.roll();
-    });
-
-    $html.on('click', '.item-cast', (ev) => {
-      const li = $(ev.currentTarget);
-      const itemId = li.data('itemId');
-      const item = this.actor.items.get(itemId);
-      if (!item) return;
-      item.roll();
-      const { spellLevel } = item.system;
-      const slots = this.actor.system.spellSlots[spellLevel];
-      const mIndex = slots.memorized.indexOf(itemId);
-      if (mIndex > -1) slots.memorized.splice(mIndex, 1);
-      const sIndex = slots.memorizedSpells.indexOf(item);
-      if (sIndex > -1) slots.memorizedSpells.splice(sIndex, 1);
-      this.render();
-    });
-
   }
 
-  async close() {
-    const index = game.user.combatHuds.indexOf(this);
-    if (index !== -1) game.user.combatHuds.splice(index, 1);
-    this._unregisterHooks();
-    return super.close();
+  scheduleRender() {
+    if (this.#closed || this.#renderScheduled) return;
+    this.#renderScheduled = true;
+    const generation = this.#renderGeneration;
+    queueMicrotask(() => {
+      this.#renderScheduled = false;
+      if (this.#closed || generation !== this.#renderGeneration) return;
+      void this.render(false, { focus: false });
+    });
   }
 
-  _registerHooks() {
-   for (const event of this.RERENDER_EVENTS) {
-      const hookId = Hooks.on(event, (actor) => {
-        const characterActor = actor.type === "character" || actor.type === "npc" ? actor : actor.parent;
-        if (characterActor === this.actor) this.render(true, { focus: false });
-      });
-      this.registeredHooks[event] = hookId;
+  async close(options = {}) {
+    if (this.#closed) return this;
+    this.#closed = true;
+    this.#renderGeneration += 1;
+    if (HUDS.get(this.token?.uuid) === this) HUDS.delete(this.token.uuid);
+    return super.close(options);
+  }
+}
+
+function measureHudFrameWidth(element, frameRect) {
+  const content = element?.querySelector?.('.combat-hud');
+  const contentRect = content?.getBoundingClientRect?.();
+  if (!content || !contentRect) return frameRect.width;
+
+  let naturalContentWidth = content.querySelector?.('.combat-hud__status')?.scrollWidth ?? 0;
+  for (const button of content.querySelectorAll?.('.combat-hud-list button') ?? []) {
+    const image = button.querySelector?.('img');
+    const label = button.querySelector?.('span');
+    if (!label) continue;
+    const style = getComputedStyle(button);
+    const imageWidth = image?.getBoundingClientRect?.().width ?? 0;
+    const gap = image ? cssPixels(style.columnGap || style.gap) : 0;
+    const horizontalPadding = cssPixels(style.paddingLeft) + cssPixels(style.paddingRight);
+    naturalContentWidth = Math.max(
+      naturalContentWidth,
+      imageWidth + gap + label.scrollWidth + horizontalPadding
+    );
+  }
+
+  const windowChromeWidth = Math.max(0, frameRect.width - contentRect.width);
+  return Math.ceil(naturalContentWidth + windowChromeWidth);
+}
+
+function cssPixels(value) {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+async function onSave() {
+  return this.actor?.rollSave?.();
+}
+
+async function onItem(_event, target) {
+  const item = this.actor?.items?.get?.(target?.dataset?.itemId);
+  return item?.roll?.();
+}
+
+async function onCast(_event, target) {
+  const item = this.actor?.items?.get?.(target?.dataset?.itemId);
+  return item?.cast?.();
+}
+
+function managerCallback(event) {
+  if (event === 'controlToken' || event === 'canvasReady') {
+    return () => { void CombatHud.reconcile(); };
+  }
+  if (event === 'canvasTearDown') {
+    return () => { void CombatHud.closeAll(); };
+  }
+  if (event === 'deleteToken') {
+    return () => { void CombatHud.reconcile(); };
+  }
+  return (document) => {
+    const actor = document?.documentName === 'Actor'
+      ? document
+      : document?.actor ?? document?.parent;
+    if (!actor?.uuid) return;
+    for (const hud of HUDS.values()) {
+      if (hud.actor?.uuid === actor.uuid) hud.scheduleRender();
+    }
+  };
+}
+
+async function runReconcileQueue() {
+  while (reconcileRequested) {
+    reconcileRequested = false;
+    await reconcileOnce();
+  }
+}
+
+async function reconcileOnce() {
+  const controlled = globalThis.canvas?.ready
+    ? Array.from(globalThis.canvas.tokens?.controlled ?? [])
+    : [];
+  const desired = new Map();
+  for (const token of controlled) {
+    const document = token?.document ?? token;
+    if (document?.uuid && (token?.actor ?? document.actor)) {
+      desired.set(document.uuid, token);
     }
   }
 
-  _unregisterHooks() {
-    for (const [event, hookId] of Object.entries(this.registeredHooks)) {
-      Hooks.off(event, hookId);
-    }
+  for (const [uuid, hud] of [...HUDS]) {
+    if (!desired.has(uuid)) await hud.close();
   }
-
-  static async activateHud(token, selected) {
-    if (game.user.combatHuds?.length) {
-      const controlled = canvas.tokens.controlled;
-      for (const hud of game.user.combatHuds) {
-        if (!controlled.includes(token)) {
-          await hud.close();
-        }
-      }
-    }
-
-    if (selected) {
-      const viewportHeight = document.documentElement.clientHeight;
-      // TODO better calculate height of hud and postition accordingly
-      const itemCount = token.actor.items.filter(i => i.type === 'weapon').length;
-      let verticalOffset = 224 + (32 * itemCount);
-      if (token.actor.system.spellSlots) {
-        const preparedCount = Object.values(token.actor.system.spellSlots).reduce(
-          (t, s) => t + s.memorized.length, 0
-        );
-        verticalOffset += 32 * preparedCount;
-      }
-      const hud = new CombatHud(token, {top: viewportHeight - verticalOffset});
-      await hud.render(true);
-    }
+  for (const [uuid, token] of desired) {
+    if (HUDS.has(uuid)) continue;
+    const hud = new CombatHud(token);
+    HUDS.set(uuid, hud);
+    await hud.render(true, { focus: false });
   }
-};
+}
+
+function clamp(value, minimum, maximum) {
+  return Math.max(minimum, Math.min(maximum, Number(value) || 0));
+}

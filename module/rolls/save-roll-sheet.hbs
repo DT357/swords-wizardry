@@ -1,7 +1,12 @@
-{{ log 'save-roll-sheet' this}}
-<h3>{{ localize 'SWORDS_WIZARDRY.Stats.SavingThrow.long' }}</h3>
-<a class="inline-result"><span>{{{roll}}}</span></a>
-<div>
-{{localize "SWORDS_WIZARDRY.Chat.Target"}} >= {{target}}
-{{# if success}}{{localize "SWORDS_WIZARDRY.Chat.Success"}}{{else}}{{localize "SWORDS_WIZARDRY.Chat.Failure"}}{{/if}}
-</div>
+<article class="swords-wizardry threshold-roll-card save-roll-card">
+  <h3 class="chat-card__title">{{localize "SWORDS_WIZARDRY.Stats.SavingThrow.long"}}</h3>
+  <a class="inline-result"><span>{{{roll}}}</span></a>
+  <div class="threshold-roll-card__result">
+    <span class="threshold-roll-card__target">
+      {{localize "SWORDS_WIZARDRY.Chat.Target"}} &ge; {{target}}
+    </span>
+    <strong class="threshold-roll-card__outcome {{#if success}}is-success{{else}}is-failure{{/if}}" role="status">
+      {{#if success}}{{localize "SWORDS_WIZARDRY.Chat.Success"}}{{else}}{{localize "SWORDS_WIZARDRY.Chat.Failure"}}{{/if}}
+    </strong>
+  </div>
+</article>

@@ -1,29 +1,44 @@
+import { parseHitDice } from './hit-dice.mjs';
+
 export class SwordsWizardryTokenDocument extends TokenDocument {
-  async _onCreate(data, options, id) {
-    await super._onCreate(data, options, id);
-    const { actor } = this;
-    if (game.user.isGM) {
-      if (actor.type === 'npc' && !this.actorLink) {
-        if (!actor.system.hp.max) {
-          const { hd } = actor.system;
-          let dice, modifier;
-          if (hd.indexOf('+') > -1) {
-            [dice, modifier] = hd.split('+');
-            modifier = `+${modifier}`;
-          } else if (hd.indexOf('-') > -1) {
-            [dice, modifier] = hd.split('-');
-            modifier = `-${modifier}`;
-          } else {
-            dice = hd;
-            modifier = '';
-          }
-          dice = dice.indexOf('d') > -1 ? dice : `${dice}d8`;
-          const rollFormula = dice + modifier;
-          const roll = await new Roll(rollFormula).evaluate();
-          actor.system.hp.max = roll.total;
-          actor.system.hp.value = roll.total;
-        }
+  async _preCreate(data, options, user) {
+    const result = await super._preCreate(data, options, user);
+    if (!isAuthorizedActiveGM(user)) return result;
+
+    const linked = data?.actorLink ?? this.actorLink;
+    const actor = this.baseActor;
+    if (
+      linked === true
+      || actor?.type !== 'npc'
+      || Number(actor.system?.hp?.max) !== 0
+    ) return result;
+
+    try {
+      const parsed = parseHitDice(actor.system?.hd);
+      if (!Roll.validate(parsed.formula)) throw new Error('INVALID_HIT_DICE');
+      const roll = await new Roll(parsed.formula).evaluate();
+      if (!Number.isSafeInteger(roll.total) || roll.total <= 0) {
+        throw new Error('INVALID_HIT_POINT_TOTAL');
       }
+      this.updateSource({
+        delta: {
+          system: {
+            hp: { max: roll.total, value: roll.total }
+          }
+        }
+      });
+    } catch {
+      ui.notifications?.warn?.(
+        game.i18n.localize('SWORDS_WIZARDRY.Token.InvalidHitDice')
+      );
     }
+    return result;
   }
+}
+
+function isAuthorizedActiveGM(user) {
+  const creatorId = typeof user === 'string' ? user : user?.id;
+  return game.user?.isGM === true
+    && game.user?.isActiveGM === true
+    && creatorId === game.user.id;
 }

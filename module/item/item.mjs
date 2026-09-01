@@ -1,5 +1,15 @@
-import { AttackRoll, FeatureRoll } from  '../rolls/rolls.mjs';
-import { captureTargetSnapshots } from '../spells/attack-plan.mjs';
+import { notifyOperationFailure } from '../helpers/notifications.mjs';
+import {
+  applyFoundryChatVisibility,
+  readFoundryRollMode
+} from '../rolls/chat-visibility.mjs';
+
+const SYSTEM_ID = 'swords-wizardry';
+const ITEM_CARD_TEMPLATE = `systems/${SYSTEM_ID}/module/templates/items/item-card.hbs`;
+const DESCRIPTION_CARD_ICONS = Object.freeze({
+  armor: `systems/${SYSTEM_ID}/assets/game-icons-net/chest-armor.svg`,
+  item: `systems/${SYSTEM_ID}/assets/game-icons-net/swap-bag.svg`
+});
 
 export class SwordsWizardryItem extends Item {
 
@@ -36,83 +46,59 @@ export class SwordsWizardryItem extends Item {
     const rollData = { ...super.getRollData() };
     rollData.name = this.name;
     rollData.item = this;
-    switch (this.type) {
-      case 'weapon':
-        return this.getWeaponRollData(rollData);
-      case 'feature':
-        return this.getFeatureRollData(rollData);
-      default:
-        return rollData;
-    }
-  }
-
-  getWeaponRollData(rollData) {
-    rollData.formula = 'd20';
-    if (this.actor) {
-      rollData.actor = this.actor.getRollData();
-      rollData.actor._id = this.actor._id;
-      rollData.targetSnapshots = captureTargetSnapshots(game.user.targets);
-      if (game.settings.get('swords-wizardry', 'useAscendingAC')) {
-        rollData.formula += ` + ${rollData.actor.tHAACB}`;
-      }
-      if (rollData.actor.toHit && rollData.actor.toHit.v !== 0)
-        rollData.formula += ` + ${rollData.actor.toHit.v}`;
-      if (rollData.missile && rollData.actor.missileToHit && rollData.actor.missileToHit !== 0)
-        rollData.formula += ` + ${rollData.actor.missileToHit.v}`;
-      if (rollData.actor.modifiers && rollData.actor.modifiers.damage && rollData.actor.modifiers.damage !== 0)
-        rollData.damageFormula += ` + ${rollData.actor.modifiers.damage.value}`;
-    }
-    if (rollData.modifier && rollData.modifier !== '0') {
-      rollData.formula += ` + ${rollData.modifier}`;
-    }
-
-    return rollData;
-  }
-
-  getFeatureRollData(rollData) {
     return rollData;
   }
 
   async post(options = {}) {
     if (this.type !== 'spell') return this.roll(options);
-    return game.swordswizardry.spells.post(this, options);
+    const result = await game.swordswizardry.spells.post(this, options);
+    return notifyOperationFailure(result, ['SWORDS_WIZARDRY.Spell.Validation']);
   }
 
   async cast(options = {}) {
     if (this.type !== 'spell') return this.roll(options);
-    return game.swordswizardry.spells.cast(this, options);
+    const result = await game.swordswizardry.spells.cast(this, options);
+    return notifyOperationFailure(result, ['SWORDS_WIZARDRY.Spell.Validation']);
   }
 
   async roll(options = {}) {
     const item = this;
-    let rollData, roll;
     switch (this.type) {
       case 'weapon':
-        rollData = this.getRollData();
-        roll = new AttackRoll(rollData.formula, rollData);
-        await roll.render();
-        return roll;
+        return notifyOperationFailure(
+          await game.swordswizardry.weapons.attack(this, options)
+        );
       case 'feature':
-        if (this.system.formula) {
-          rollData = this.getRollData();
-          roll = new FeatureRoll(rollData.formula, rollData);
-          await roll.render();
-          return roll;
-        }
+        return notifyOperationFailure(
+          await game.swordswizardry.rolls.feature(this, options),
+          ['SWORDS_WIZARDRY.Roll.Error']
+        );
       case 'spell':
         return this.post(options);
       case 'item':
-      case 'armor':
-        // TODO update this 
+      case 'armor': {
         const speaker = ChatMessage.getSpeaker({ actor: this.actor });
-        const rollMode = game.settings.get('core', 'rollMode');
-        const label = `[${item.type}] ${item.name}`;
-        return ChatMessage.create({
+        const rollMode = readFoundryRollMode(game.settings);
+        const TextEditor = foundry.applications.ux.TextEditor;
+        const renderTemplate = foundry.applications.handlebars.renderTemplate;
+        const description = await TextEditor.enrichHTML(item.system.description ?? '', {
+          relativeTo: item,
+          rollData: item.actor?.getRollData?.() ?? {}
+        });
+        const content = await renderTemplate(ITEM_CARD_TEMPLATE, {
+          item: {
+            name: item.name,
+            img: item.img || DESCRIPTION_CARD_ICONS[item.type]
+          },
+          description
+        });
+        return ChatMessage.create(applyFoundryChatVisibility(ChatMessage, {
           speaker: speaker,
           rollMode: rollMode,
-          flavor: label,
-          content: item.system.description ?? '',
-        });
+          content,
+          rolls: []
+        }));
+      }
     }
   }
 }

@@ -27,10 +27,10 @@ class TangibleItemData extends BaseItemData {
     return {
       ...base,
       quantity: new NumberField({
-        required: true, integer: true, minimum: 0, initial: 1
+        required: true, nullable: false, integer: true, min: 0, initial: 1
       }),
       weight: new NumberField({
-        required: true, integer: true, minimum: 0, initial: 1
+        required: true, nullable: false, integer: true, min: 0, initial: 1
       }),
       pp: new NumberField({ integer: true, min: 0, initial: 0 }),
       gp: new NumberField({ integer: true, min: 0, initial: 0 }),
@@ -45,6 +45,7 @@ export class ArmorData extends TangibleItemData {
     const base = super.defineSchema();
     return {
       ...base,
+      equipped: new BooleanField({ initial: true }),
       effectOnAC: new NumberField({ integer: true, initial: 0 })
     };
   }
@@ -55,7 +56,7 @@ export class FeatureData extends BaseItemData {
     const base = super.defineSchema();
     return {
       ...base,
-      formula: new StringField({ initial: "d6" }),
+      formula: new StringField({ initial: '' }),
       target: new NumberField({ integer: true, initial: 1 }),
       targetType: new StringField({ initial: "descending" })
     };

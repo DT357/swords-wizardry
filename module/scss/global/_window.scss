@@ -1,14 +1,5 @@
 @use '../utils/typography' as *;
 
-body {
-  font-family: $font-primary;
-  font-size: 10pt;
-}
-
-.window-app {
-  font-family: $font-primary;
-}
-
 /* Need to scope this down and maybe weight down to 700?
 h1, h2, h3, h4, h5 {
     font-family: $font-header;
@@ -19,8 +10,13 @@ h1, h2, h3, h4, h5 {
 
 .swords-wizardry {
   font-family: $font-primary;
-}
 
-input {
+  input,
+  // Foundry's ApplicationV2 header controls put the Font Awesome class on
+  // the button itself. Let semantic icon buttons retain that icon font.
+  button:not(.icon),
+  select,
+  textarea {
     font-family: $font-primary;
+  }
 }

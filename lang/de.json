@@ -7,8 +7,176 @@
       "Damage": "Damage",
       "Special": "Special",
       "Target": "Target",
+      "RollNamed": "{name} würfeln",
       "Success": "Success",
       "Failure": "Failure"
+    },
+    "Actions": {
+      "EditImage": "Bild für {name} ändern"
+    },
+    "Settings": {
+      "UseAscendingAC": {
+        "Name": "Aufsteigende RK verwenden",
+        "Hint": "Rüstungsklasse mit aufsteigenden Werten anzeigen und auswerten."
+      },
+      "DmAppliesDamage": {
+        "Name": "SL muss Schaden / Heilung anwenden",
+        "Hint": "Wenn aktiviert, kann nur die Spielleitung Schaden oder Heilung über Chatkarten anwenden. Andernfalls werden vertrauenswürdige Ergebnisse automatisch angewendet."
+      },
+      "ShowWelcome": {
+        "Name": "Willkommensnachricht beim Start anzeigen",
+        "Hint": "Zeigt die System-Willkommensnachricht beim nächsten Start der Welt."
+      },
+      "SystemVersion": { "Name": "Gespeicherte Systemversion" },
+      "Debug": {
+        "Name": "Debug-Protokollierung",
+        "Hint": "Zusätzliche Swords-&-Wizardry-Diagnosen in die Browserkonsole schreiben."
+      }
+    },
+    "Authority": {
+      "LegacyCard": "Diese ältere Karte dient nur zur Anzeige. Zauber erneut anzeigen oder Waffe erneut würfeln, um eine vertrauenswürdige Karte zu erstellen.",
+      "Status": {
+        "pending": "Anwendung ausstehend",
+        "conflict": "Ziel wurde geändert; manuell prüfen"
+      },
+      "Error": {
+        "UNKNOWN": "Der Vorgang konnte nicht abgeschlossen werden.",
+        "AUTHORITY_UNAVAILABLE": "Der maßgebliche Spieldienst ist nicht verfügbar.",
+        "NO_ACTIVE_GM": "Eine aktive Spielleitung ist erforderlich.",
+        "NOT_AUTHORIZED": "Du bist für diesen Vorgang nicht berechtigt.",
+        "INVALID_REQUEST": "Die Anfrage ist ungültig.",
+        "DUPLICATE_REQUEST_ID": "Diese Anfrage wird bereits verarbeitet.",
+        "UNKNOWN_OPERATION": "Der angeforderte Vorgang wird nicht unterstützt.",
+        "INVALID_HANDLER_RESULT": "Der Spieldienst hat ein ungültiges Ergebnis geliefert.",
+        "INVALID_RESULT_CAPABILITY": "Diese Karte kann keine Trefferpunkte verändern.",
+        "TARGET_NOT_ALLOWED": "Dieses Ziel gehört nicht zu diesem Ergebnis.",
+        "MODE_NOT_ALLOWED": "Diese Anwendungsart ist nicht verfügbar.",
+        "APPLICATION_IN_PROGRESS": "Dieses Ergebnis wird bereits angewendet.",
+        "APPLICATION_FAILED": "Die Trefferpunktänderung konnte nicht angewendet werden.",
+        "ALREADY_APPLIED": "Dieses Ergebnis wurde bereits angewendet.",
+        "TARGET_STATE_CONFLICT": "Das Ziel wurde vor der Anwendung geändert. Trefferpunkte manuell prüfen.",
+        "TARGET_NOT_FOUND": "Das Ziel ist nicht mehr verfügbar.",
+        "TARGET_UPDATE_FAILED": "Das Ziel konnte nicht aktualisiert werden.",
+        "MESSAGE_NOT_FOUND": "Die Chatkarte ist nicht mehr verfügbar.",
+        "MODE_DEFINITION_MISMATCH": "Die Anwendungsdaten der Karte sind widersprüchlich.",
+        "AUDIT_PENDING_FAILED": "Der Sicherheitsnachweis konnte nicht erstellt werden; Trefferpunkte wurden nicht verändert.",
+        "AUDIT_FINALIZE_FAILED": "Trefferpunkte wurden verändert, aber der Sicherheitsnachweis konnte nicht abgeschlossen werden. Ziel manuell prüfen.",
+        "TRANSPORT_TIMEOUT": "Die aktive Spielleitung hat nicht rechtzeitig geantwortet.",
+        "TRANSPORT_NOT_STARTED": "Der Spieldienst ist noch nicht bereit.",
+        "TRANSPORT_STOPPED": "Der Spieldienst wurde beendet, bevor die Anfrage abgeschlossen war.",
+        "TRANSPORT_EMIT_FAILED": "Die Anfrage konnte nicht an die aktive Spielleitung gesendet werden.",
+        "HANDLER_FAILED": "Die aktive Spielleitung konnte den Vorgang nicht abschließen.",
+        "STALE_SOURCE": "Der Quellgegenstand wurde geändert. Erneut anzeigen oder würfeln.",
+        "SOURCE_NOT_FOUND": "Der Quellgegenstand ist nicht mehr verfügbar.",
+        "NO_HIT_TARGETS": "Der Angriff hat keine verfügbaren Ziele getroffen.",
+        "INVALID_ATTACK_CAPABILITY": "Mit dieser Karte kann kein Waffenschaden gewürfelt werden.",
+        "ROLL_FAILED": "Der Wurf konnte nicht abgeschlossen werden.",
+        "INVALID_ROLL_FORMULA": "Die Würfelformel ist ungültig.",
+        "INVALID_SAVE_TARGET": "Der Rettungswurf-Zielwert ist ungültig.",
+        "INVALID_FEATURE": "Dieses Merkmal ist nicht mehr verfügbar.",
+        "INVALID_MORALE_TARGET": "Der Moral-Zielwert ist ungültig."
+      }
+    },
+    "Roll": {
+      "Error": {
+        "UNKNOWN": "Der Wurf konnte nicht abgeschlossen werden.",
+        "NOT_AUTHORIZED": "Du bist für diesen Wurf nicht berechtigt.",
+        "AUTHORITY_UNAVAILABLE": "Der maßgebliche Spieldienst ist nicht verfügbar.",
+        "NO_ACTIVE_GM": "Für diesen Wurf ist eine aktive Spielleitung erforderlich.",
+        "INVALID_REQUEST": "Die Würfelanfrage ist ungültig.",
+        "INVALID_ABILITY": "Dieses Attribut ist nicht verfügbar.",
+        "INVALID_ABILITY_TARGET": "Der Attributwert ist ungültig.",
+        "INVALID_SAVE_TARGET": "Der Rettungswurf-Zielwert ist ungültig.",
+        "INVALID_FEATURE": "Dieses Merkmal ist nicht mehr verfügbar.",
+        "INVALID_MORALE_TARGET": "Der Moral-Zielwert ist ungültig.",
+        "INVALID_ROLL_FORMULA": "Die Würfelformel ist ungültig.",
+        "INVALID_ROLL_RESULT": "Der Wurf ergab keinen gültigen Wert.",
+        "ROLL_FAILED": "Der Wurf konnte nicht abgeschlossen werden."
+      }
+    },
+    "Combat": {
+      "SideInitiative": "Seiteninitiative",
+      "Party": "Gruppe",
+      "Opponents": "Gegner",
+      "SideInitiativeFailed": "Die Seiteninitiative konnte nicht gewürfelt werden."
+    },
+    "Token": {
+      "InvalidHitDice": "Trefferwürfel müssen eine Formel wie 3d8, 2d6+1 oder 4 verwenden. Die geerbten Trefferpunkte bleiben unverändert."
+    },
+    "Hud": {
+      "Title": "{name}",
+      "RollSave": "Rettungswurf würfeln",
+      "RollItem": "{name} würfeln",
+      "CastSpell": "{name} wirken"
+    },
+    "Importer": {
+      "Title": "NSC-Werteblock importieren",
+      "Open": "NSC importieren",
+      "OpenHint": "Einen NSC aus einem Swords-&-Wizardry-Werteblock importieren",
+      "ExpectedFormat": "Einen vollständigen NSC-Werteblock mit Feldbezeichnungen einfügen.",
+      "Example": "Goblin: HD 1d6; AC 6 [13]; Attack Spear (1d6); Move 9; Save 18; Morale 7; Alignment chaotic; CL/XP 1/15",
+      "StatBlock": "NSC-Werteblock",
+      "Submit": "NSC importieren",
+      "NotAuthorized": "Nur die Spielleitung kann NSC importieren.",
+      "FieldError": "{field}: {error}",
+      "Fields": {
+        "input": "Eingabe",
+        "name": "Name",
+        "hd": "Trefferwürfel",
+        "ac": "Rüstungsklasse",
+        "attack": "Angriffe",
+        "moveRate": "Bewegung",
+        "save": "Rettungswurf",
+        "morale": "Moral",
+        "alignment": "Gesinnung",
+        "clxp": "CL/EP",
+        "hp": "Trefferpunkte",
+        "special": "Besonderes",
+        "form": "Import"
+      },
+      "Errors": {
+        "INVALID_LENGTH": "Der Werteblock ist leer oder länger als 20.000 Zeichen.",
+        "MISSING_NAME": "Einen Namen mit folgendem Doppelpunkt angeben.",
+        "DUPLICATE_FIELD": "Dieses Feld kommt mehrfach vor.",
+        "MISSING_FIELD": "Dieses Pflichtfeld fehlt.",
+        "INVALID_HIT_DICE": "Trefferwürfel wie 3d8, 2d6+1 oder 4 verwenden.",
+        "INVALID_ATTACKS": "Vollständige Angriffe wie Speer (1d6), Biss (1d4) verwenden.",
+        "INVALID_CL_XP": "CL/EP in der Form Stufe/Erfahrung angeben.",
+        "INVALID_ARMOR_CLASS": "Absteigende RK, optional mit aufsteigender RK in Klammern, angeben.",
+        "INVALID_MOVERATE": "Bewegung muss eine ganze Zahl von 0 bis 1.000 sein.",
+        "INVALID_SAVE": "Rettungswurf muss eine ganze Zahl von 0 bis 100 sein.",
+        "INVALID_MORALE": "Moral muss eine ganze Zahl von 0 bis 12 sein.",
+        "INVALID_HP": "Trefferpunkte müssen eine ganze Zahl von 0 bis 1.000.000 sein.",
+        "NOT_AUTHORIZED": "Nur die Spielleitung kann NSC importieren.",
+        "INVALID_STAT_BLOCK": "Die markierten Felder des Werteblocks korrigieren.",
+        "INVALID_ATTACK_FORMULA": "Mindestens eine Schadensformel ist ungültig.",
+        "ACTOR_CREATE_FAILED": "Der NSC konnte nicht erstellt werden.",
+        "IMPORT_IN_PROGRESS": "Ein NSC-Import läuft bereits."
+      }
+    },
+    "CharacterCreator": {
+      "Title": "Charakter erstellen",
+      "Open": "Charakter erstellen",
+      "OpenHint": "Einen neuen Swords-&-Wizardry-Charakter erstellen",
+      "Name": "Charaktername",
+      "Folder": "Ordner",
+      "NoFolder": "Kein Ordner",
+      "Submit": "Charakter erstellen",
+      "Errors": {
+        "NOT_AUTHORIZED": "Du hast keine Berechtigung, Akteure zu erstellen.",
+        "CREATION_IN_PROGRESS": "Die Charaktererstellung läuft bereits.",
+        "INVALID_FOLDER": "Einen verfügbaren Akteursordner auswählen.",
+        "ROLL_FAILED": "Die Attributswürfe konnten nicht abgeschlossen werden.",
+        "INVALID_NAME": "Einen Charakternamen mit höchstens 100 Zeichen eingeben.",
+        "INVALID_USER": "Der erstellende Benutzer konnte nicht ermittelt werden.",
+        "INVALID_ROLL_RESULT": "Ein Charakterwurf ergab einen ungültigen Wert.",
+        "INVALID_CHARACTER": "Die Charakterdaten sind ungültig.",
+        "ACTOR_CREATE_FAILED": "Der Charakter konnte nicht erstellt werden."
+      }
+    },
+    "Macro": {
+      "OwnedItemsOnly": "Makros können nur für eigene Gegenstände erstellt werden.",
+      "MissingItem": "Gegenstand {item} wurde nicht gefunden. Dieses Makro löschen und neu erstellen."
     },
     "Spell": {
       "Actions": {
@@ -201,6 +369,8 @@
           "Name": "Name",
           "New": "New Armor",
           "EffectOnAC": "Effect on AC",
+          "Equipped": "Ausgerüstet",
+          "ToggleEquipped": "Ausrüstungsstatus für {name} umschalten",
           "Update": "Update Armor",
           "Weight": "Weight"
         }
@@ -219,6 +389,8 @@
           "Name": "Name",
           "New": "Neuer Gegenstand",
           "Quantity": "Menge",
+          "Increment": "Menge von {name} erhöhen",
+          "Decrement": "Menge von {name} verringern",
           "Update": "Gegenstand ändern",
           "Weight": "Gewicht"
         },
@@ -260,7 +432,8 @@
     },
     "Stats": {
       "Alignment": "Gesinnung",
-      "ArmorClass": { "long": "Rüstungsklasse", "abbr": "RK" },
+      "ArmorClass": { "long": "Rüstungsklasse", "abbr": "RK", "ascending": "Aufsteigend" },
+      "AttackBonus": "Angriffsbonus",
       "Class": "Klasse",
       "CL_XP": { "long": "Härtegrad / Erfahrungspunkte", "abbr": "HG / EP" },
       "HitDie": { "long": "Trefferwürfel", "abbr": "TW" },
@@ -324,7 +497,8 @@
       },
       "Armor": {
         "Attributes": {
-          "EffectOnAC": "Auswirkung auf RK"
+          "EffectOnAC": "Auswirkung auf RK",
+          "Equipped": "Ausgerüstet"
         },
         "Name": "Name",
         "Quantity": "Anzahl",

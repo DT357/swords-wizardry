@@ -230,6 +230,26 @@ textarea:focus-visible {
     border-inline-start: 4px solid var(--color-level-warning, #9a6700);
     padding: 0.4rem 0.6rem;
   }
+
+  &__legacy-warning {
+    border-inline-start: 4px solid var(--color-level-warning, #9a6700);
+    padding: 0.4rem 0.6rem;
+  }
+}
+
+.weapon-card__legacy-warning {
+  border-inline-start: 4px solid var(--color-level-warning, #9a6700);
+  padding: 0.4rem 0.6rem;
+}
+
+.icon-control {
+  width: auto;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 0.2rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
 }
 
 .spell-result {
@@ -258,6 +278,10 @@ textarea:focus-visible {
   &__target-status,
   &__application-status {
     display: block;
+  }
+
+  &__attack-outcome {
+    display: inline;
   }
 
   &__application-controls {

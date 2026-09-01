@@ -2,8 +2,7 @@ export const SYSTEM_ID = 'swords-wizardry';
 
 export const SPELL_FLAG_KEY = 'spell';
 export const SPELL_ITEM_SCHEMA_VERSION = 1;
-export const SPELL_MESSAGE_SCHEMA_VERSION = 1;
-export const SPELL_APPLICATION_SCHEMA_VERSION = 1;
+export const SPELL_MESSAGE_SCHEMA_VERSION = 2;
 
 export const SPELL_ACTION_KINDS = Object.freeze([
   'damage',
@@ -51,8 +50,7 @@ export const SPELL_ACTION_LIMITS = Object.freeze({
   formula: 200,
   notes: 1000,
   effectReference: 500,
-  targetCount: 100,
-  hitPointAmount: 1_000_000
+  targetCount: 100
 });
 
 export const SPELL_FORMULA_PATHS = Object.freeze([
@@ -60,7 +58,3 @@ export const SPELL_FORMULA_PATHS = Object.freeze([
   'spell.casterLevel',
   'spell.abilityModifier'
 ]);
-
-export const SPELL_APPLICATION_MULTIPLIERS = Object.freeze([0.5, 1, 2]);
-
-export const SPELL_APPLICATION_OPERATION = 'applyHitPoints';

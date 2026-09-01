@@ -7,8 +7,176 @@
       "Damage": "Daño",
       "Special": "Especial",
       "Target": "Objetivo",
+      "RollNamed": "Tirar {name}",
       "Success": "Éxito",
       "Failure": "Fallo"
+    },
+    "Actions": {
+      "EditImage": "Cambiar la imagen de {name}"
+    },
+    "Settings": {
+      "UseAscendingAC": {
+        "Name": "Usar CA ascendente",
+        "Hint": "Muestra y resuelve la clase de armadura con valores ascendentes."
+      },
+      "DmAppliesDamage": {
+        "Name": "El DJ debe aplicar daño / curación",
+        "Hint": "Si está activado, solo el DJ puede aplicar daño o curación desde las tarjetas del chat. Si está desactivado, los resultados de confianza se aplican automáticamente."
+      },
+      "ShowWelcome": {
+        "Name": "Mostrar mensaje de bienvenida al iniciar",
+        "Hint": "Muestra el mensaje de bienvenida del sistema la próxima vez que se inicie el mundo."
+      },
+      "SystemVersion": { "Name": "Versión del sistema guardada" },
+      "Debug": {
+        "Name": "Registro de depuración",
+        "Hint": "Escribe diagnósticos adicionales de Swords & Wizardry en la consola del navegador."
+      }
+    },
+    "Authority": {
+      "LegacyCard": "Esta tarjeta antigua es solo informativa. Vuelve a publicar el conjuro o a tirar el arma para crear una tarjeta de confianza.",
+      "Status": {
+        "pending": "Aplicación pendiente",
+        "conflict": "El objetivo cambió; revísalo manualmente"
+      },
+      "Error": {
+        "UNKNOWN": "No se pudo completar la operación.",
+        "AUTHORITY_UNAVAILABLE": "El servicio de juego autorizado no está disponible.",
+        "NO_ACTIVE_GM": "Se necesita un DJ activo.",
+        "NOT_AUTHORIZED": "No tienes autorización para realizar esta operación.",
+        "INVALID_REQUEST": "La solicitud no es válida.",
+        "DUPLICATE_REQUEST_ID": "Esta solicitud ya se está procesando.",
+        "UNKNOWN_OPERATION": "La operación solicitada no está admitida.",
+        "INVALID_HANDLER_RESULT": "El servicio de juego devolvió un resultado no válido.",
+        "INVALID_RESULT_CAPABILITY": "Esta tarjeta no puede cambiar puntos de golpe.",
+        "TARGET_NOT_ALLOWED": "Ese objetivo no forma parte de este resultado.",
+        "MODE_NOT_ALLOWED": "Ese modo de aplicación no está disponible.",
+        "APPLICATION_IN_PROGRESS": "Este resultado ya se está aplicando.",
+        "APPLICATION_FAILED": "No se pudo aplicar el cambio de puntos de golpe.",
+        "ALREADY_APPLIED": "Este resultado ya se aplicó.",
+        "TARGET_STATE_CONFLICT": "El objetivo cambió antes de aplicar el resultado. Revisa sus puntos de golpe manualmente.",
+        "TARGET_NOT_FOUND": "El objetivo ya no está disponible.",
+        "TARGET_UPDATE_FAILED": "No se pudo actualizar el objetivo.",
+        "MESSAGE_NOT_FOUND": "La tarjeta del chat ya no está disponible.",
+        "MODE_DEFINITION_MISMATCH": "Los datos de aplicación de la tarjeta son incoherentes.",
+        "AUDIT_PENDING_FAILED": "No se pudo crear el registro de seguridad, por lo que no cambiaron los puntos de golpe.",
+        "AUDIT_FINALIZE_FAILED": "Los puntos de golpe cambiaron, pero no se pudo completar el registro de seguridad. Revisa el objetivo manualmente.",
+        "TRANSPORT_TIMEOUT": "El DJ activo no respondió a tiempo.",
+        "TRANSPORT_NOT_STARTED": "El servicio de juego aún no está listo.",
+        "TRANSPORT_STOPPED": "El servicio de juego se detuvo antes de completar la solicitud.",
+        "TRANSPORT_EMIT_FAILED": "No se pudo enviar la solicitud al DJ activo.",
+        "HANDLER_FAILED": "El DJ activo no pudo completar la operación.",
+        "STALE_SOURCE": "El objeto de origen cambió. Vuelve a publicarlo o a tirar.",
+        "SOURCE_NOT_FOUND": "El objeto de origen ya no está disponible.",
+        "NO_HIT_TARGETS": "El ataque no impactó a ningún objetivo disponible.",
+        "INVALID_ATTACK_CAPABILITY": "Esta tarjeta no puede tirar daño de arma.",
+        "ROLL_FAILED": "No se pudo completar la tirada.",
+        "INVALID_ROLL_FORMULA": "La fórmula de tirada no es válida.",
+        "INVALID_SAVE_TARGET": "El objetivo de la tirada de salvación no es válido.",
+        "INVALID_FEATURE": "Esta capacidad ya no está disponible.",
+        "INVALID_MORALE_TARGET": "El objetivo de moral no es válido."
+      }
+    },
+    "Roll": {
+      "Error": {
+        "UNKNOWN": "No se pudo completar la tirada.",
+        "NOT_AUTHORIZED": "No tienes autorización para realizar esta tirada.",
+        "AUTHORITY_UNAVAILABLE": "El servicio de juego autorizado no está disponible.",
+        "NO_ACTIVE_GM": "Se necesita un DJ activo para esta tirada.",
+        "INVALID_REQUEST": "La solicitud de tirada no es válida.",
+        "INVALID_ABILITY": "Ese atributo no está disponible.",
+        "INVALID_ABILITY_TARGET": "La puntuación del atributo no es válida.",
+        "INVALID_SAVE_TARGET": "El objetivo de la tirada de salvación no es válido.",
+        "INVALID_FEATURE": "Esta capacidad ya no está disponible.",
+        "INVALID_MORALE_TARGET": "El objetivo de moral no es válido.",
+        "INVALID_ROLL_FORMULA": "La fórmula de tirada no es válida.",
+        "INVALID_ROLL_RESULT": "La tirada no produjo un total válido.",
+        "ROLL_FAILED": "No se pudo completar la tirada."
+      }
+    },
+    "Combat": {
+      "SideInitiative": "Iniciativa por bandos",
+      "Party": "Grupo",
+      "Opponents": "Oponentes",
+      "SideInitiativeFailed": "No se pudo tirar la iniciativa por bandos."
+    },
+    "Token": {
+      "InvalidHitDice": "Los Dados de Golpe deben usar una fórmula como 3d8, 2d6+1 o 4. Los puntos de golpe heredados no cambiaron."
+    },
+    "Hud": {
+      "Title": "{name}",
+      "RollSave": "Tirar salvación",
+      "RollItem": "Tirar {name}",
+      "CastSpell": "Lanzar {name}"
+    },
+    "Importer": {
+      "Title": "Importar bloque de estadísticas de PNJ",
+      "Open": "Importar PNJ",
+      "OpenHint": "Importar un PNJ desde un bloque de estadísticas de Swords & Wizardry",
+      "ExpectedFormat": "Pega un bloque de estadísticas completo de PNJ con campos etiquetados.",
+      "Example": "Goblin: HD 1d6; AC 6 [13]; Attack Spear (1d6); Move 9; Save 18; Morale 7; Alignment chaotic; CL/XP 1/15",
+      "StatBlock": "Bloque de estadísticas de PNJ",
+      "Submit": "Importar PNJ",
+      "NotAuthorized": "Solo el DJ puede importar PNJ.",
+      "FieldError": "{field}: {error}",
+      "Fields": {
+        "input": "Entrada",
+        "name": "Nombre",
+        "hd": "Dados de Golpe",
+        "ac": "Clase de Armadura",
+        "attack": "Ataques",
+        "moveRate": "Movimiento",
+        "save": "Salvación",
+        "morale": "Moral",
+        "alignment": "Alineamiento",
+        "clxp": "CL/XP",
+        "hp": "Puntos de Golpe",
+        "special": "Especial",
+        "form": "Importación"
+      },
+      "Errors": {
+        "INVALID_LENGTH": "El bloque está vacío o supera los 20.000 caracteres.",
+        "MISSING_NAME": "Añade un nombre seguido de dos puntos.",
+        "DUPLICATE_FIELD": "Este campo aparece más de una vez.",
+        "MISSING_FIELD": "Falta este campo obligatorio.",
+        "INVALID_HIT_DICE": "Usa Dados de Golpe como 3d8, 2d6+1 o 4.",
+        "INVALID_ATTACKS": "Usa ataques completos como Lanza (1d6), Mordisco (1d4).",
+        "INVALID_CL_XP": "Usa CL/XP con el formato nivel/experiencia.",
+        "INVALID_ARMOR_CLASS": "Usa CA descendente y, opcionalmente, CA ascendente entre corchetes.",
+        "INVALID_MOVERATE": "Movimiento debe ser un entero entre 0 y 1.000.",
+        "INVALID_SAVE": "Salvación debe ser un entero entre 0 y 100.",
+        "INVALID_MORALE": "Moral debe ser un entero entre 0 y 12.",
+        "INVALID_HP": "Puntos de Golpe debe ser un entero entre 0 y 1.000.000.",
+        "NOT_AUTHORIZED": "Solo el DJ puede importar PNJ.",
+        "INVALID_STAT_BLOCK": "Corrige los campos indicados del bloque.",
+        "INVALID_ATTACK_FORMULA": "Una o más fórmulas de daño no son válidas.",
+        "ACTOR_CREATE_FAILED": "No se pudo crear el PNJ.",
+        "IMPORT_IN_PROGRESS": "Ya hay una importación de PNJ en curso."
+      }
+    },
+    "CharacterCreator": {
+      "Title": "Crear personaje",
+      "Open": "Crear personaje",
+      "OpenHint": "Crear un nuevo personaje de Swords & Wizardry",
+      "Name": "Nombre del personaje",
+      "Folder": "Carpeta",
+      "NoFolder": "Sin carpeta",
+      "Submit": "Crear personaje",
+      "Errors": {
+        "NOT_AUTHORIZED": "No tienes permiso para crear Actores.",
+        "CREATION_IN_PROGRESS": "Ya hay una creación de personaje en curso.",
+        "INVALID_FOLDER": "Elige una carpeta de Actores disponible.",
+        "ROLL_FAILED": "No se pudieron completar las tiradas de características.",
+        "INVALID_NAME": "Escribe un nombre de personaje de 100 caracteres o menos.",
+        "INVALID_USER": "No se pudo identificar al usuario creador.",
+        "INVALID_ROLL_RESULT": "Una tirada del personaje produjo un valor no válido.",
+        "INVALID_CHARACTER": "Los datos del personaje no son válidos.",
+        "ACTOR_CREATE_FAILED": "No se pudo crear el personaje."
+      }
+    },
+    "Macro": {
+      "OwnedItemsOnly": "Solo puedes crear botones de macro para objetos propios.",
+      "MissingItem": "No se encontró el objeto {item}. Borra y vuelve a crear esta macro."
     },
     "Spell": {
       "Actions": {
@@ -201,6 +369,8 @@
           "Name": "Nombre",
           "New": "Nueva armadura",
           "EffectOnAC": "Bono CA",
+          "Equipped": "Equipado",
+          "ToggleEquipped": "Cambiar el estado equipado de {name}",
           "Update": "Actualizar armadura",
           "Weight": "Peso"
         }
@@ -219,6 +389,8 @@
           "Name": "Nombre",
           "New": "Nuevo objeto",
           "Quantity": "Cantidad",
+          "Increment": "Aumentar la cantidad de {name}",
+          "Decrement": "Reducir la cantidad de {name}",
           "Update": "Actualizar objeto",
           "Weight": "Peso"
         },
@@ -260,7 +432,8 @@
     },
     "Stats": {
       "Alignment": "Alineamiento",
-      "ArmorClass": { "long": "Clase de armadura", "abbr": "CA" },
+      "ArmorClass": { "long": "Clase de armadura", "abbr": "CA", "ascending": "Ascendente" },
+      "AttackBonus": "Bonificador de ataque",
       "Class": "Clase",
       "CL_XP": {
         "long": "Nivel de reto / Puntos de experiencia",
@@ -321,7 +494,8 @@
       },
       "Armor": {
         "Attributes": {
-          "EffectOnAC": "Bono a la CA"
+          "EffectOnAC": "Bono a la CA",
+          "Equipped": "Equipado"
         },
         "Name": "Nombre",
         "Quantity": "Cantidad",

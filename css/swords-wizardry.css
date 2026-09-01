@@ -1,62 +1,52 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
 @font-face {
   font-family: "Libre Baskerville";
-  src: url("/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Regular.ttf");
+  src: url("../assets/fonts/LibreBaskerville/LibreBaskerville-Regular.ttf");
 }
 @font-face {
   font-family: "Libre Baskerville";
   font-weight: bold;
-  src: url("/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
+  src: url("../assets/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
 }
 @font-face {
   font-family: "Libre Baskerville";
   font-style: italic;
-  src: url("/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Italic.ttf");
+  src: url("../assets/fonts/LibreBaskerville/LibreBaskerville-Italic.ttf");
 }
 @font-face {
   font-family: "Inter";
-  src: url("/systems/swords-wizardry/assets/fonts/Inter/Inter_24pt-Regular.ttf");
+  src: url("../assets/fonts/Inter/Inter_24pt-Regular.ttf");
 }
 @font-face {
   font-family: "Inter";
   font-weight: 800;
-  src: url("/systems/swords-wizardry/assets/fonts/Inter/Inter_24pt-ExtraBold.ttf");
+  src: url("../assets/fonts/Inter/Inter_24pt-ExtraBold.ttf");
 }
 /*$font-header: 'Inter';*/
 /* Global styles */
 @font-face {
   font-family: "Libre Baskerville";
-  src: url("/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Regular.ttf");
+  src: url("../assets/fonts/LibreBaskerville/LibreBaskerville-Regular.ttf");
 }
 @font-face {
   font-family: "Libre Baskerville";
   font-weight: bold;
-  src: url("/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
+  src: url("../assets/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
 }
 @font-face {
   font-family: "Libre Baskerville";
   font-style: italic;
-  src: url("/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Italic.ttf");
+  src: url("../assets/fonts/LibreBaskerville/LibreBaskerville-Italic.ttf");
 }
 @font-face {
   font-family: "Inter";
-  src: url("/systems/swords-wizardry/assets/fonts/Inter/Inter_24pt-Regular.ttf");
+  src: url("../assets/fonts/Inter/Inter_24pt-Regular.ttf");
 }
 @font-face {
   font-family: "Inter";
   font-weight: 800;
-  src: url("/systems/swords-wizardry/assets/fonts/Inter/Inter_24pt-ExtraBold.ttf");
+  src: url("../assets/fonts/Inter/Inter_24pt-ExtraBold.ttf");
 }
 /*$font-header: 'Inter';*/
-body {
-  font-family: "Libre Baskerville";
-  font-size: 10pt;
-}
-
-.window-app {
-  font-family: "Libre Baskerville";
-}
-
 /* Need to scope this down and maybe weight down to 700?
 h1, h2, h3, h4, h5 {
     font-family: $font-header;
@@ -68,7 +58,10 @@ h1, h2, h3, h4, h5 {
   font-family: "Libre Baskerville";
 }
 
-input {
+.swords-wizardry input,
+.swords-wizardry button:not(.icon),
+.swords-wizardry select,
+.swords-wizardry textarea {
   font-family: "Libre Baskerville";
 }
 
@@ -335,64 +328,76 @@ input {
 }
 @font-face {
   font-family: "Libre Baskerville";
-  src: url("/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Regular.ttf");
+  src: url("../assets/fonts/LibreBaskerville/LibreBaskerville-Regular.ttf");
 }
 @font-face {
   font-family: "Libre Baskerville";
   font-weight: bold;
-  src: url("/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
+  src: url("../assets/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
 }
 @font-face {
   font-family: "Libre Baskerville";
   font-style: italic;
-  src: url("/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Italic.ttf");
+  src: url("../assets/fonts/LibreBaskerville/LibreBaskerville-Italic.ttf");
 }
 @font-face {
   font-family: "Inter";
-  src: url("/systems/swords-wizardry/assets/fonts/Inter/Inter_24pt-Regular.ttf");
+  src: url("../assets/fonts/Inter/Inter_24pt-Regular.ttf");
 }
 @font-face {
   font-family: "Inter";
   font-weight: 800;
-  src: url("/systems/swords-wizardry/assets/fonts/Inter/Inter_24pt-ExtraBold.ttf");
+  src: url("../assets/fonts/Inter/Inter_24pt-ExtraBold.ttf");
 }
 .swords-wizardry {
   /*$font-header: 'Inter';*/
 }
-.swords-wizardry .combat-hud-name {
-  font-family: "Libre Baskerville";
+.swords-wizardry .combat-hud {
+  min-width: 0;
+  font-size: var(--font-size-14, 14px);
+}
+.swords-wizardry .combat-hud__status {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin: 0 0 0.25rem;
+  white-space: nowrap;
 }
 .swords-wizardry .combat-hud-list {
+  display: grid;
+  gap: 0;
   list-style: none;
   padding: 0;
-  margin-bottom: 0;
+  margin: 0;
 }
-.swords-wizardry .combat-hud-list img {
-  display: inline;
-  vertical-align: middle;
+.swords-wizardry .combat-hud-list button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  width: 100%;
+  min-width: 0;
+  min-height: 28px;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font-size: var(--font-size-12, 12px);
+  line-height: 1.2;
+  text-align: left;
 }
-.swords-wizardry .combat-hud-list span {
-  vertical-align: middle;
-  padding-left: 4px;
+.swords-wizardry .combat-hud-list button img {
+  flex: 0 0 24px;
+  object-fit: cover;
 }
-.swords-wizardry .combat-hud-list .save-roll .rollable > div {
-  height: 24px;
-  width: 24px;
-  border: solid 1px black;
-  text-align: center;
-  padding-top: 3px;
-  color: white;
-}
-.swords-wizardry .effects .item .effect-source,
-.swords-wizardry .effects .item .effect-duration,
-.swords-wizardry .effects .item .effect-controls {
-  text-align: center;
-  border-left: 1px solid #c9c7b8;
-  border-right: 1px solid #c9c7b8;
-  font-size: 12px;
-}
-.swords-wizardry .effects .item .effect-controls {
-  border: none;
+.swords-wizardry .combat-hud-list button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .swords-wizardry .item-form {
   /*font-family: $font-primary;*/
@@ -404,10 +409,22 @@ input {
   flex-wrap: wrap;
   justify-content: flex-start;
 }
-.swords-wizardry .sheet-header .profile-img {
+.swords-wizardry .sheet-header .profile-image-button {
   flex: 0 0 100px;
+  width: 100px;
   height: 100px;
   margin-right: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  min-height: 0;
+}
+.swords-wizardry .sheet-header .profile-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: cover;
 }
 .swords-wizardry .sheet-header .header-fields {
   flex: 1;
@@ -505,11 +522,25 @@ input {
   flex: 0 0 150px;
   justify-content: flex-end;
 }
-.swords-wizardry .items-list .item-controls a {
+.swords-wizardry .items-list .item-controls button {
   font-size: 12px;
   text-align: center;
   margin: 0 6px;
   margin-top: -3px;
+}
+.swords-wizardry .items-list button.item-control,
+.swords-wizardry .items-list button.rollable {
+  width: auto;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  line-height: 1;
+}
+.swords-wizardry .items-list button.rollable img {
+  display: block;
 }
 .swords-wizardry .items-list .item {
   align-items: center;
@@ -536,6 +567,41 @@ input {
   border-right: 1px solid #c9c7b8;
   font-size: 12px;
 }
+.swords-wizardry .items-list.columnar-items-list .item:not(.items-header) {
+  margin-block: 0;
+  padding-block: 6px;
+}
+.swords-wizardry .items-list.columnar-items-list .item > * {
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  margin-block: 0;
+  border: 0;
+}
+.swords-wizardry .items-list.columnar-items-list .item > :not(.item-name):not(.item-controls) {
+  justify-content: center;
+}
+.swords-wizardry .items-list.columnar-items-list .item > .item-controls {
+  margin-block: 0;
+}
+.swords-wizardry .items-list.columnar-items-list .item > * + * {
+  border-inline-start: 1px solid var(--color-border-light-tertiary, #c9c7b8);
+}
+.swords-wizardry .items-list.columnar-items-list .item-prop {
+  margin-top: 0;
+}
+.swords-wizardry .items-list.columnar-items-list .item .item-name .item-name-span,
+.swords-wizardry .items-list.columnar-items-list .item .item-controls button {
+  margin-top: 0;
+}
+.swords-wizardry .items-list.columnar-items-list .item-quantity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
 .swords-wizardry .items-list .items-header {
   height: 28px;
   margin: 2px 0;
@@ -558,26 +624,26 @@ input {
 }
 @font-face {
   font-family: "Libre Baskerville";
-  src: url("/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Regular.ttf");
+  src: url("../assets/fonts/LibreBaskerville/LibreBaskerville-Regular.ttf");
 }
 @font-face {
   font-family: "Libre Baskerville";
   font-weight: bold;
-  src: url("/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
+  src: url("../assets/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
 }
 @font-face {
   font-family: "Libre Baskerville";
   font-style: italic;
-  src: url("/systems/swords-wizardry/assets/fonts/LibreBaskerville/LibreBaskerville-Italic.ttf");
+  src: url("../assets/fonts/LibreBaskerville/LibreBaskerville-Italic.ttf");
 }
 @font-face {
   font-family: "Inter";
-  src: url("/systems/swords-wizardry/assets/fonts/Inter/Inter_24pt-Regular.ttf");
+  src: url("../assets/fonts/Inter/Inter_24pt-Regular.ttf");
 }
 @font-face {
   font-family: "Inter";
   font-weight: 800;
-  src: url("/systems/swords-wizardry/assets/fonts/Inter/Inter_24pt-ExtraBold.ttf");
+  src: url("../assets/fonts/Inter/Inter_24pt-ExtraBold.ttf");
 }
 .swords-wizardry {
   /*$font-header: 'Inter';*/
@@ -590,10 +656,52 @@ input {
 .swords-wizardry .damage-special-text {
   margin-top: 5px;
 }
+.swords-wizardry .chat-card__title {
+  font-size: 1rem;
+  line-height: 1.25;
+}
 .swords-wizardry .damage-target {
   border: 1px solid #666666;
+  list-style-position: inside;
   padding: 5px;
   margin-top: 5px;
+}
+.swords-wizardry .item-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.swords-wizardry .item-card__header img {
+  flex: 0 0 auto;
+}
+.swords-wizardry .item-card__header h3 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.swords-wizardry .feature-card__description,
+.swords-wizardry .item-card__description {
+  margin-block: 0.5rem;
+  overflow-wrap: anywhere;
+}
+.swords-wizardry .feature-card__description:empty,
+.swords-wizardry .item-card__description:empty {
+  display: none;
+}
+.swords-wizardry .feature-card__description > :first-child,
+.swords-wizardry .item-card__description > :first-child {
+  margin-top: 0;
+}
+.swords-wizardry .feature-card__description > :last-child,
+.swords-wizardry .item-card__description > :last-child {
+  margin-bottom: 0;
+}
+.swords-wizardry .weapon-card__target-name {
+  font-weight: 700;
+}
+.swords-wizardry .weapon-card__targets.damage-targets {
+  padding-inline-start: 0;
 }
 .swords-wizardry .damage-buttons {
   display: flex;
@@ -602,7 +710,29 @@ input {
 }
 .swords-wizardry .damage-buttons button {
   flex: 1;
+  min-width: 0;
   font-size: 11px;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.swords-wizardry .threshold-roll-card__result {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+.swords-wizardry .threshold-roll-card__outcome {
+  margin-inline-start: auto;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+.swords-wizardry .threshold-roll-card__outcome.is-success {
+  color: var(--color-level-success, #1b8f23);
+}
+.swords-wizardry .threshold-roll-card__outcome.is-failure {
+  color: var(--color-level-error, #ce0707);
 }
 .swords-wizardry .resource {
   display: flex;
@@ -633,6 +763,38 @@ input {
 .swords-wizardry h4 {
   font-family: "Libre Baskerville";
   font-size: 16px;
+}
+.swords-wizardry .stat-roll-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+}
+.swords-wizardry .stat-roll-control > *,
+.swords-wizardry .ability-roll-control > * {
+  pointer-events: none;
+}
+.swords-wizardry .ability .ability-roll-control {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
 }
 .swords-wizardry .ability label {
   padding-top: 8px;
@@ -849,6 +1011,23 @@ input {
   border-inline-start: 4px solid var(--color-level-warning, #9a6700);
   padding: 0.4rem 0.6rem;
 }
+.swords-wizardry .spell-card__legacy-warning {
+  border-inline-start: 4px solid var(--color-level-warning, #9a6700);
+  padding: 0.4rem 0.6rem;
+}
+.swords-wizardry .weapon-card__legacy-warning {
+  border-inline-start: 4px solid var(--color-level-warning, #9a6700);
+  padding: 0.4rem 0.6rem;
+}
+.swords-wizardry .icon-control {
+  width: auto;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 0.2rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
 .swords-wizardry .spell-result__roll {
   margin-block: 0.5rem;
 }
@@ -868,6 +1047,9 @@ input {
 }
 .swords-wizardry .spell-result__target-status, .swords-wizardry .spell-result__application-status {
   display: block;
+}
+.swords-wizardry .spell-result__attack-outcome {
+  display: inline;
 }
 .swords-wizardry .spell-result__application-controls {
   display: flex;

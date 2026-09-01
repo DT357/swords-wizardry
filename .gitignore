@@ -4,3 +4,7 @@ debug.log
 dist/
 playwright-report/
 test-results/
+RuntimeTests/
+evidence/
+*.map
+*~

@@ -1,0 +1,18 @@
+<article class="swords-wizardry weapon-card weapon-attack" data-weapon-message-kind="weapon-attack">
+  <header class="item-card__header weapon-card__header">
+    {{#if weapon.item.img}}<img src="{{weapon.item.img}}" alt="" width="36" height="36">{{/if}}
+    <h3 class="chat-card__title">{{weapon.item.name}}</h3>
+  </header>
+  <div class="weapon-card__roll" aria-label="{{localize 'SWORDS_WIZARDRY.Chat.Rolled'}}">{{{rollHTML}}}</div>
+  {{#if weapon.targets.length}}
+    <ol class="weapon-card__targets">
+      {{#each weapon.targets as |target|}}
+        <li><strong class="weapon-card__target-name">{{target.name}}</strong>: <span class="weapon-card__target-outcome">{{#if (eq target.outcome "hit")}}{{localize "SWORDS_WIZARDRY.Spell.Card.AttackOutcome.hit"}}!{{else}}{{#if (eq target.outcome "miss")}}{{localize "SWORDS_WIZARDRY.Spell.Card.AttackOutcome.miss"}}!{{else}}{{localize "SWORDS_WIZARDRY.Spell.Card.MissingTarget"}}{{/if}}{{/if}}</span></li>
+      {{/each}}
+    </ol>
+  {{/if}}
+  {{#if weapon.hitTargetUuids.length}}
+    <button type="button" data-action="weaponDamage">{{localize "SWORDS_WIZARDRY.Chat.Damage"}}: {{weapon.damageFormula}}</button>
+  {{/if}}
+  {{#if weapon.item.specialDamage}}<p>{{localize "SWORDS_WIZARDRY.Chat.Special"}}: {{weapon.item.specialDamage}}</p>{{/if}}
+</article>

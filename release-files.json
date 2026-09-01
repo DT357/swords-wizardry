@@ -16,10 +16,6 @@
       "files": ["swords-wizardry.css"]
     },
     {
-      "path": "docs",
-      "extensions": [".md"]
-    },
-    {
       "path": "lang",
       "extensions": [".json"]
     },

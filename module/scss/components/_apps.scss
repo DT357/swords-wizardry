@@ -1,30 +1,54 @@
 @use '../utils/typography' as *;
 
-.combat-hud-name {
-  font-family: $font-primary;
+.combat-hud {
+  min-width: 0;
+  font-size: var(--font-size-14, 14px);
 }
+
+.combat-hud__status {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin: 0 0 0.25rem;
+  white-space: nowrap;
+}
+
 .combat-hud-list {
+  display: grid;
+  gap: 0;
   list-style: none;
   padding: 0;
-  margin-bottom: 0;
+  margin: 0;
 }
 
-.combat-hud-list img {
-  display: inline;
-  vertical-align: middle;
-}
+.combat-hud-list button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  width: 100%;
+  min-width: 0;
+  min-height: 28px;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font-size: var(--font-size-12, 12px);
+  line-height: 1.2;
+  text-align: left;
 
-.combat-hud-list span {
-  vertical-align: middle;
-  padding-left: 4px;
-}
+  img {
+    flex: 0 0 24px;
+    object-fit: cover;
+  }
 
-
-.combat-hud-list .save-roll .rollable > div {
-  height:24px;
-  width: 24px;
-  border: solid 1px black;
-  text-align: center;
-  padding-top: 3px;
-  color: white;
+  span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }

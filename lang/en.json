@@ -7,8 +7,178 @@
       "Damage": "Damage",
       "Special": "Special",
       "Target": "Target",
+      "RollNamed": "Roll {name}",
       "Success": "Success",
       "Failure": "Failure"
+    },
+    "Actions": {
+      "EditImage": "Change image for {name}"
+    },
+    "Settings": {
+      "UseAscendingAC": {
+        "Name": "Use ascending AC",
+        "Hint": "Display and resolve armor class using ascending values."
+      },
+      "DmAppliesDamage": {
+        "Name": "DM must apply damage / healing",
+        "Hint": "When enabled, only a GM can use chat-card controls to apply damage or healing. When disabled, trusted results are applied automatically."
+      },
+      "ShowWelcome": {
+        "Name": "Show welcome message on startup",
+        "Hint": "Show the system welcome message the next time the world starts."
+      },
+      "SystemVersion": {
+        "Name": "Stored system version"
+      },
+      "Debug": {
+        "Name": "Debug logging",
+        "Hint": "Write additional Swords & Wizardry diagnostic messages to the browser console."
+      }
+    },
+    "Authority": {
+      "LegacyCard": "This older card is display-only. Post the spell or roll the weapon again to create a trusted card.",
+      "Status": {
+        "pending": "Application pending",
+        "conflict": "Target changed; review manually"
+      },
+      "Error": {
+        "UNKNOWN": "The operation could not be completed.",
+        "AUTHORITY_UNAVAILABLE": "The authoritative game service is unavailable.",
+        "NO_ACTIVE_GM": "An active GM is required.",
+        "NOT_AUTHORIZED": "You are not authorized to perform this operation.",
+        "INVALID_REQUEST": "The request is invalid.",
+        "DUPLICATE_REQUEST_ID": "This request is already being processed.",
+        "UNKNOWN_OPERATION": "The requested operation is not supported.",
+        "INVALID_HANDLER_RESULT": "The game service returned an invalid result.",
+        "INVALID_RESULT_CAPABILITY": "This card cannot apply hit-point changes.",
+        "TARGET_NOT_ALLOWED": "That target is not part of this result.",
+        "MODE_NOT_ALLOWED": "That application mode is not available.",
+        "APPLICATION_IN_PROGRESS": "This result is already being applied.",
+        "APPLICATION_FAILED": "The hit-point change could not be applied.",
+        "ALREADY_APPLIED": "This result was already applied.",
+        "TARGET_STATE_CONFLICT": "The target changed before the result could be applied. Review its hit points manually.",
+        "TARGET_NOT_FOUND": "The target is no longer available.",
+        "TARGET_UPDATE_FAILED": "The target could not be updated.",
+        "MESSAGE_NOT_FOUND": "The chat card is no longer available.",
+        "MODE_DEFINITION_MISMATCH": "The card's application data is inconsistent.",
+        "AUDIT_PENDING_FAILED": "The safety record could not be created, so no hit points were changed.",
+        "AUDIT_FINALIZE_FAILED": "Hit points changed, but the final safety record could not be completed. Review the target manually.",
+        "TRANSPORT_TIMEOUT": "The active GM did not respond in time.",
+        "TRANSPORT_NOT_STARTED": "The game service is not ready.",
+        "TRANSPORT_STOPPED": "The game service stopped before the request completed.",
+        "TRANSPORT_EMIT_FAILED": "The request could not be sent to the active GM.",
+        "HANDLER_FAILED": "The active GM could not complete the operation.",
+        "STALE_SOURCE": "The source Item changed. Post or roll it again.",
+        "SOURCE_NOT_FOUND": "The source Item is no longer available.",
+        "NO_HIT_TARGETS": "The attack did not hit any available targets.",
+        "INVALID_ATTACK_CAPABILITY": "This card cannot roll weapon damage.",
+        "ROLL_FAILED": "The roll could not be completed.",
+        "INVALID_ROLL_FORMULA": "The roll formula is invalid.",
+        "INVALID_SAVE_TARGET": "The saving throw target is invalid.",
+        "INVALID_FEATURE": "This feature is no longer available.",
+        "INVALID_MORALE_TARGET": "The morale target is invalid."
+      }
+    },
+    "Roll": {
+      "Error": {
+        "UNKNOWN": "The roll could not be completed.",
+        "NOT_AUTHORIZED": "You are not authorized to make this roll.",
+        "AUTHORITY_UNAVAILABLE": "The authoritative game service is unavailable.",
+        "NO_ACTIVE_GM": "An active GM is required for this roll.",
+        "INVALID_REQUEST": "The roll request is invalid.",
+        "INVALID_ABILITY": "That attribute is not available.",
+        "INVALID_ABILITY_TARGET": "The attribute score is invalid.",
+        "INVALID_SAVE_TARGET": "The saving throw target is invalid.",
+        "INVALID_FEATURE": "This feature is no longer available.",
+        "INVALID_MORALE_TARGET": "The morale target is invalid.",
+        "INVALID_ROLL_FORMULA": "The roll formula is invalid.",
+        "INVALID_ROLL_RESULT": "The roll did not produce a valid total.",
+        "ROLL_FAILED": "The roll could not be completed."
+      }
+    },
+    "Combat": {
+      "SideInitiative": "Side Initiative",
+      "Party": "Party",
+      "Opponents": "Opponents",
+      "SideInitiativeFailed": "Side initiative could not be rolled."
+    },
+    "Token": {
+      "InvalidHitDice": "Hit Dice must use a formula such as 3d8, 2d6+1, or 4. The inherited hit points were left unchanged."
+    },
+    "Hud": {
+      "Title": "{name}",
+      "RollSave": "Roll saving throw",
+      "RollItem": "Roll {name}",
+      "CastSpell": "Cast {name}"
+    },
+    "Importer": {
+      "Title": "Import NPC stat block",
+      "Open": "Import NPC",
+      "OpenHint": "Import an NPC from a Swords & Wizardry stat block",
+      "ExpectedFormat": "Paste one complete NPC stat block using labeled fields.",
+      "Example": "Goblin: HD 1d6; AC 6 [13]; Attack Spear (1d6); Move 9; Save 18; Morale 7; Alignment chaotic; CL/XP 1/15",
+      "StatBlock": "NPC stat block",
+      "Submit": "Import NPC",
+      "NotAuthorized": "Only a GM can import NPCs.",
+      "FieldError": "{field}: {error}",
+      "Fields": {
+        "input": "Input",
+        "name": "Name",
+        "hd": "Hit Dice",
+        "ac": "Armor Class",
+        "attack": "Attacks",
+        "moveRate": "Movement",
+        "save": "Saving Throw",
+        "morale": "Morale",
+        "alignment": "Alignment",
+        "clxp": "CL/XP",
+        "hp": "Hit Points",
+        "special": "Special",
+        "form": "Import"
+      },
+      "Errors": {
+        "INVALID_LENGTH": "The stat block is empty or exceeds 20,000 characters.",
+        "MISSING_NAME": "Add a name followed by a colon.",
+        "DUPLICATE_FIELD": "This field appears more than once.",
+        "MISSING_FIELD": "This required field is missing.",
+        "INVALID_HIT_DICE": "Use Hit Dice such as 3d8, 2d6+1, or 4.",
+        "INVALID_ATTACKS": "Use complete attacks such as Spear (1d6), Bite (1d4).",
+        "INVALID_CL_XP": "Use CL/XP in the form level/experience.",
+        "INVALID_ARMOR_CLASS": "Use descending AC, optionally followed by ascending AC in brackets.",
+        "INVALID_MOVERATE": "Movement must be a whole number from 0 to 1,000.",
+        "INVALID_SAVE": "Saving Throw must be a whole number from 0 to 100.",
+        "INVALID_MORALE": "Morale must be a whole number from 0 to 12.",
+        "INVALID_HP": "Hit Points must be a whole number from 0 to 1,000,000.",
+        "NOT_AUTHORIZED": "Only a GM can import NPCs.",
+        "INVALID_STAT_BLOCK": "Correct the highlighted stat-block fields.",
+        "INVALID_ATTACK_FORMULA": "One or more attack damage formulas are invalid.",
+        "ACTOR_CREATE_FAILED": "The NPC could not be created.",
+        "IMPORT_IN_PROGRESS": "An NPC import is already in progress."
+      }
+    },
+    "CharacterCreator": {
+      "Title": "Create Character",
+      "Open": "Create Character",
+      "OpenHint": "Create a new Swords & Wizardry character",
+      "Name": "Character name",
+      "Folder": "Folder",
+      "NoFolder": "No folder",
+      "Submit": "Create Character",
+      "Errors": {
+        "NOT_AUTHORIZED": "You do not have permission to create Actors.",
+        "CREATION_IN_PROGRESS": "Character creation is already in progress.",
+        "INVALID_FOLDER": "Choose an available Actor folder.",
+        "ROLL_FAILED": "The character ability rolls could not be completed.",
+        "INVALID_NAME": "Enter a character name of 100 characters or fewer.",
+        "INVALID_USER": "The creating user could not be identified.",
+        "INVALID_ROLL_RESULT": "A character roll produced an invalid value.",
+        "INVALID_CHARACTER": "The character data is invalid.",
+        "ACTOR_CREATE_FAILED": "The character could not be created."
+      }
+    },
+    "Macro": {
+      "OwnedItemsOnly": "You can only create macro buttons for owned Items.",
+      "MissingItem": "Could not find Item {item}. Delete and recreate this macro."
     },
     "Spell": {
       "Actions": {
@@ -201,6 +371,8 @@
           "Name": "Name",
           "New": "New Armor",
           "EffectOnAC": "Effect on AC",
+          "Equipped": "Equipped",
+          "ToggleEquipped": "Toggle equipped state for {name}",
           "Update": "Update Armor",
           "Weight": "Weight"
         }
@@ -219,6 +391,8 @@
           "Name": "Name",
           "New": "New Item",
           "Quantity": "Quantity",
+          "Increment": "Increase {name} quantity",
+          "Decrement": "Decrease {name} quantity",
           "Update": "Update Item",
           "Weight": "Weight"
         },
@@ -260,7 +434,8 @@
     },
     "Stats": {
       "Alignment": "Alignment",
-      "ArmorClass": { "long": "Armor Class", "abbr": "AC" },
+      "ArmorClass": { "long": "Armor Class", "abbr": "AC", "ascending": "Ascending" },
+      "AttackBonus": "Attack Bonus",
       "Class": "Class",
       "CL_XP": {
         "long": "Challenge Level / Experience Points",
@@ -321,7 +496,8 @@
       },
       "Armor": {
         "Attributes": {
-          "EffectOnAC": "Effect on AC"
+          "EffectOnAC": "Effect on AC",
+          "Equipped": "Equipped"
         },
         "Name": "Name",
         "Quantity": "Quantity",

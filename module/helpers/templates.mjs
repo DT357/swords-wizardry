@@ -10,7 +10,6 @@ export const preloadHandlebarsTemplates = async function () {
     'systems/swords-wizardry/module/actor/features.hbs',
     'systems/swords-wizardry/module/actor/weapons.hbs',
     'systems/swords-wizardry/module/actor/items.hbs',
-    'systems/swords-wizardry/module/actor/spells.hbs',
-    'systems/swords-wizardry/module/actor/effects.hbs'
+    'systems/swords-wizardry/module/actor/spells.hbs'
   ]);
 };

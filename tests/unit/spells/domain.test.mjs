@@ -3,7 +3,6 @@ import test from 'node:test';
 
 import {
   SpellValidationError,
-  applyHitPointChange,
   buildSpellMessageSnapshot,
   consumePreparedSpell,
   createSpellRollData,
@@ -12,9 +11,9 @@ import {
   normalizeSpellActions,
   planSpellAction,
   resolveCasterLevel,
-  validateApplicationRequest,
   validateFormulaReferences
 } from '../../../module/spells/domain.mjs';
+import { SPELL_MESSAGE_SCHEMA_VERSION } from '../../../module/spells/constants.mjs';
 
 const damageAction = {
   id: 'action-damage',
@@ -179,7 +178,7 @@ test('creates deterministic action fingerprints and immutable snapshots', () => 
   assert.equal(snapshot.item.name, 'Fireball');
   assert.equal(snapshot.actions[0].label, 'Fire damage');
   assert.deepEqual(snapshot.targetUuids, ['Scene.scene-1.Token.token-1']);
-  assert.equal(snapshot.schemaVersion, 1);
+  assert.equal(snapshot.schemaVersion, SPELL_MESSAGE_SCHEMA_VERSION);
 });
 
 test('plans an action from the snapshot rather than live targets', () => {
@@ -230,55 +229,4 @@ test('consumes exactly one prepared occurrence without mutating the input', () =
     index: -1,
     prepared
   });
-});
-
-test('clamps damage and healing and reports the amount actually applied', () => {
-  assert.deepEqual(applyHitPointChange({
-    kind: 'damage', current: 6, maximum: 10, amount: 8, multiplier: 1
-  }), { oldHP: 6, newHP: 0, requestedAmount: 8, appliedAmount: 6 });
-
-  assert.deepEqual(applyHitPointChange({
-    kind: 'healing', current: 6, maximum: 10, amount: 8, multiplier: 1
-  }), { oldHP: 6, newHP: 10, requestedAmount: 8, appliedAmount: 4 });
-
-  assert.deepEqual(applyHitPointChange({
-    kind: 'damage', current: 6, maximum: 10, amount: 5, multiplier: 0.5
-  }), { oldHP: 6, newHP: 4, requestedAmount: 2, appliedAmount: 2 });
-
-  assert.deepEqual(applyHitPointChange({
-    kind: 'healing', current: 12, maximum: 10, amount: 3, multiplier: 1
-  }), { oldHP: 12, newHP: 12, requestedAmount: 3, appliedAmount: 0 });
-
-  assert.throws(
-    () => applyHitPointChange({ kind: 'damage', current: 6, maximum: 10, amount: NaN }),
-    (error) => error.code === 'INVALID_HP_AMOUNT'
-  );
-});
-
-test('validates a strict bounded application request', () => {
-  const request = {
-    schemaVersion: 1,
-    requestId: 'request-12345678',
-    operation: 'applyHitPoints',
-    messageUuid: 'ChatMessage.message-1',
-    actionId: 'action-damage',
-    actionFingerprint: fingerprintAction(damageAction),
-    targetUuid: 'Scene.scene-1.Token.token-1',
-    kind: 'damage',
-    amount: 6,
-    multiplier: 0.5
-  };
-  assert.deepEqual(validateApplicationRequest(request), request);
-  assert.throws(
-    () => validateApplicationRequest({ ...request, claimedUserId: 'spoofed' }),
-    (error) => error.code === 'UNKNOWN_FIELD'
-  );
-  assert.throws(
-    () => validateApplicationRequest({ ...request, amount: Number.POSITIVE_INFINITY }),
-    (error) => error.code === 'INVALID_HP_AMOUNT'
-  );
-  assert.throws(
-    () => validateApplicationRequest({ ...request, operation: 'deleteActor' }),
-    (error) => error.code === 'INVALID_APPLICATION_OPERATION'
-  );
 });

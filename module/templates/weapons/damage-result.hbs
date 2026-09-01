@@ -1,0 +1,24 @@
+<article class="swords-wizardry weapon-card weapon-damage" data-weapon-message-kind="weapon-damage">
+  <header class="item-card__header weapon-card__header">
+    {{#if weapon.item.img}}<img src="{{weapon.item.img}}" alt="" width="36" height="36">{{/if}}
+    <h3 class="chat-card__title">{{localize "SWORDS_WIZARDRY.Chat.Damage"}}: {{weapon.item.name}}</h3>
+  </header>
+  <div class="weapon-card__roll" aria-label="{{localize 'SWORDS_WIZARDRY.Chat.Damage'}}">{{{rollHTML}}}</div>
+  {{#if weapon.item.specialDamage}}<p>{{localize "SWORDS_WIZARDRY.Chat.Special"}}: {{weapon.item.specialDamage}}</p>{{/if}}
+  {{#if weapon.targets.length}}
+    <ol class="weapon-card__targets damage-targets">
+      {{#each weapon.targets as |target|}}
+        <li class="damage-target" data-weapon-target-uuid="{{target.uuid}}">
+          <span class="target-name">{{target.name}}</span>
+          <div class="damage-buttons weapon-card__application-controls">
+            <button type="button" data-action="weaponApply" data-mode="fullDamage" data-target-uuid="{{target.uuid}}">{{localize "SWORDS_WIZARDRY.Spell.Actions.Damage"}}</button>
+            <button type="button" data-action="weaponApply" data-mode="halfDamage" data-target-uuid="{{target.uuid}}">{{localize "SWORDS_WIZARDRY.Spell.Actions.Half"}}</button>
+            <button type="button" data-action="weaponApply" data-mode="doubleDamage" data-target-uuid="{{target.uuid}}">{{localize "SWORDS_WIZARDRY.Spell.Actions.Double"}}</button>
+            <button type="button" data-action="weaponApply" data-mode="healing" data-target-uuid="{{target.uuid}}">{{localize "SWORDS_WIZARDRY.Spell.Actions.ApplyHealing"}}</button>
+          </div>
+          <span class="weapon-card__application-status" aria-live="polite"></span>
+        </li>
+      {{/each}}
+    </ol>
+  {{/if}}
+</article>

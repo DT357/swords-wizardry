@@ -9,15 +9,16 @@
         <h3>{{ localize 'SWORDS_WIZARDRY.CharacterSheet.Main.AttributeScores' }}</h3>
         {{#each system.abilities as |ability key|}}
         <div class="ability grid grid-6col">
-          <label
-            for="system.abilities.{{key}}.value"
-            class="resource-label grid-span-3 align-left"
-            data-action="roll"
-            data-roll="d20+@abilities.{{key}}.mod"
-            data-label="{{ability.label}}"
+          <button
+            type="button"
+            class="ability-roll-control grid-span-3"
+            data-action="abilityRoll"
+            data-ability="{{key}}"
+            aria-label="{{localize 'SWORDS_WIZARDRY.Chat.RollNamed' name=ability.label}}"
           >
-            {{ability.label}}
-          </label>
+            <i class="fas fa-dice-d20" aria-hidden="true"></i>
+            <span>{{ability.label}}</span>
+          </button>
           <input class="checkbox-small" type="checkbox" name="system.abilities.{{key}}.prime" {{checked ability.prime}}/>
           <input class="resource-value grid-span-2" type="text" name="system.abilities.{{key}}.value" value="{{ability.value}}" data-dtype="Number"/>
         </div>
@@ -48,62 +49,67 @@
             {{localize 'SWORDS_WIZARDRY.CharacterSheet.Features.Table.Name'}}
           </div>
           <div class='item-controls'>
-            <a
+            <button
+              type="button"
               class='item-control'
               data-action="itemCreate"
               data-type='feature'
-              title={{
+              aria-label={{
                 localize 'SWORDS_WIZARDRY.CharacterSheet.Features.Table.Create'
                 type='feature'
               }}
             >
-              <i class='fas fa-plus'></i>
-            </a>
+              <i class='fas fa-plus' aria-hidden="true"></i>
+            </button>
           </div>
         </li>
         {{#each features as |item id|}}
         <li class='item grid grid-4col' data-item-id='{{item._id}}'>
           <div class='item-name grid-span-3'>
             <div class='item-image'>
-              <a
+              <button
+                type="button"
                 class='rollable'
                 data-action="roll"
                 data-id="{{item._id}}"
                 data-roll-type='item'
+                aria-label="{{localize 'SWORDS_WIZARDRY.Chat.RollNamed' name=item.name}}"
               >
                 <img
                   src='{{item.img}}'
-                  title='{{item.name}}'
+                  alt=""
                   width='24'
                   height='24'
                 />
-              </a>
+              </button>
             </div>
             <span class='item-name-span'>{{item.name}}</span>
           </div>
           <div class='item-controls'>
-            <a
+            <button
+              type="button"
               class='item-control'
               data-action="itemEdit"
               data-id="{{item.id}}"
-              title='{{
+              aria-label='{{
                 localize "SWORDS_WIZARDRY.CharacterSheet.Features.Table.Update"
                 type='feature'
               }}'
             >
-              <i class='fas fa-edit'></i>
-            </a>
-            <a
+              <i class='fas fa-edit' aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
               class='item-control'
               data-action="itemDelete"
               data-id="{{item.id}}"
-              title='{{
+              aria-label='{{
                 localize "SWORDS_WIZARDRY.CharacterSheet.Features.Table.Delete"
                 type='feature'
               }}'
             >
-              <i class='fas fa-trash'></i>
-            </a>
+              <i class='fas fa-trash' aria-hidden="true"></i>
+            </button>
           </div>
         </li>
         {{/each}}
